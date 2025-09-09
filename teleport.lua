@@ -62,10 +62,10 @@ local function teleportSequence()
             for _, pos in ipairs(coords) do
                 if not autoTeleport then break end
                 root.CFrame = CFrame.new(pos)
-                task.wait(1)
+                task.wait(2)
             end
         end
-        task.wait(1)
+        task.wait(2)
     end
 end
 
