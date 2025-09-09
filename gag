@@ -2,76 +2,152 @@ local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "CarrotMoveGui"
+screenGui.Name = "AutoMoveGui"
 screenGui.Parent = player:WaitForChild("PlayerGui")
 screenGui.ResetOnSpawn = false
 
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 220, 0, 80)
-mainFrame.Position = UDim2.new(0.75, 0, 0.25, 0)
-mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+mainFrame.Size = UDim2.new(0, 300, 0, 400)
+mainFrame.Position = UDim2.new(0.7, 0, 0.2, 0)
+mainFrame.BackgroundColor3 = Color3.fromRGB(30,30,40)
 mainFrame.Active = true
 mainFrame.Draggable = true
 mainFrame.Parent = screenGui
-Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 10)
+Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0,10)
 
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 0, 28)
-title.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
-title.Text = "Carrot Wet Move"
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.Size = UDim2.new(1,0,0,30)
+title.BackgroundColor3 = Color3.fromRGB(20,20,30)
+title.Text = "Auto Trowel GUI"
+title.TextColor3 = Color3.fromRGB(255,255,255)
 title.Font = Enum.Font.GothamBold
 title.TextSize = 14
 title.Parent = mainFrame
 
+local fruitFrame = Instance.new("Frame")
+fruitFrame.Size = UDim2.new(1,-10,0,150)
+fruitFrame.Position = UDim2.new(0,5,0,35)
+fruitFrame.BackgroundTransparency = 1
+fruitFrame.Parent = mainFrame
+local fruitLayout = Instance.new("UIListLayout", fruitFrame)
+fruitLayout.Padding = UDim.new(0,4)
+fruitLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+local mutationFrame = Instance.new("Frame")
+mutationFrame.Size = UDim2.new(1,-10,0,150)
+mutationFrame.Position = UDim2.new(0,5,0,190)
+mutationFrame.BackgroundTransparency = 1
+mutationFrame.Parent = mainFrame
+local mutationLayout = Instance.new("UIListLayout", mutationFrame)
+mutationLayout.Padding = UDim.new(0,4)
+mutationLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
 local toggleBtn = Instance.new("TextButton")
-toggleBtn.Size = UDim2.new(0.9, 0, 0, 32)
-toggleBtn.Position = UDim2.new(0.05, 0, 0, 36)
-toggleBtn.BackgroundColor3 = Color3.fromRGB(200, 80, 80)
+toggleBtn.Size = UDim2.new(0.9,0,0,32)
+toggleBtn.Position = UDim2.new(0.05,0,0,350)
+toggleBtn.BackgroundColor3 = Color3.fromRGB(200,80,80)
 toggleBtn.Text = "Auto-Move: OFF"
-toggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleBtn.TextColor3 = Color3.fromRGB(255,255,255)
 toggleBtn.Font = Enum.Font.GothamBold
 toggleBtn.TextSize = 12
 toggleBtn.Parent = mainFrame
-Instance.new("UICorner", toggleBtn).CornerRadius = UDim.new(0, 8)
+Instance.new("UICorner", toggleBtn).CornerRadius = UDim.new(0,8)
 
-local autoMove = false
+local fruits = {}
+local mutations = {}
 
-local function moveCarrots()
-    local char = player.Character
-    if not char then return end
-    local root = char:FindFirstChild("HumanoidRootPart")
-    if not root then return end
-
-    for _, plant in pairs(workspace:GetDescendants()) do
-        if plant:IsA("Model") and plant.Name == "Carrot" then
-            local mutations = plant:FindFirstChild("Mutations")
-            if mutations and mutations:IsA("StringValue") then
-                if string.find(mutations.Value:lower(), "wet") then
-                    local primary = plant:FindFirstChild("PrimaryPart") or plant:FindFirstChildWhichIsA("BasePart")
-                    if primary then
-                        primary.CFrame = root.CFrame + Vector3.new(0,0,0)
-                        warn("Carrot Wet dipindahkan ke posisi player!")
-                    end
-                end
+for _, plant in pairs(workspace:GetDescendants()) do
+    if plant:IsA("Model") then
+        fruits[plant.Name] = true
+        local mut = plant:FindFirstChild("Mutations")
+        if mut and mut:IsA("StringValue") then
+            for m in string.gmatch(mut.Value,"[^,]+") do
+                m = m:gsub("^%s+",""):gsub("%s+$","")
+                mutations[m] = true
             end
         end
     end
 end
 
+local fruitCheckboxes = {}
+for f,_ in pairs(fruits) do
+    local cb = Instance.new("TextButton")
+    cb.Size = UDim2.new(1,0,0,24)
+    cb.Text = f.." [ ]"
+    cb.TextColor3 = Color3.fromRGB(255,255,255)
+    cb.BackgroundColor3 = Color3.fromRGB(50,50,50)
+    cb.Font = Enum.Font.Gotham
+    cb.TextSize = 12
+    cb.Parent = fruitFrame
+    Instance.new("UICorner", cb).CornerRadius = UDim.new(0,6)
+    local checked = false
+    cb.MouseButton1Click:Connect(function()
+        checked = not checked
+        cb.Text = f.." ["..(checked and "X" or " ").."]"
+        fruitCheckboxes[f] = checked
+    end)
+    fruitCheckboxes[f] = false
+end
+
+local mutationCheckboxes = {}
+for m,_ in pairs(mutations) do
+    local cb = Instance.new("TextButton")
+    cb.Size = UDim2.new(1,0,0,24)
+    cb.Text = m.." [ ]"
+    cb.TextColor3 = Color3.fromRGB(255,255,255)
+    cb.BackgroundColor3 = Color3.fromRGB(50,50,50)
+    cb.Font = Enum.Font.Gotham
+    cb.TextSize = 12
+    cb.Parent = mutationFrame
+    Instance.new("UICorner", cb).CornerRadius = UDim.new(0,6)
+    local checked = false
+    cb.MouseButton1Click:Connect(function()
+        checked = not checked
+        cb.Text = m.." ["..(checked and "X" or " ").."]"
+        mutationCheckboxes[m] = checked
+    end)
+    mutationCheckboxes[m] = false
+end
+
+local autoMove = false
 toggleBtn.MouseButton1Click:Connect(function()
     autoMove = not autoMove
     if autoMove then
         toggleBtn.Text = "Auto-Move: ON"
-        toggleBtn.BackgroundColor3 = Color3.fromRGB(80, 200, 80)
+        toggleBtn.BackgroundColor3 = Color3.fromRGB(80,200,80)
         task.spawn(function()
             while autoMove do
-                moveCarrots()
+                local char = player.Character
+                if char and char:FindFirstChild("HumanoidRootPart") then
+                    local root = char.HumanoidRootPart
+                    for _, plant in pairs(workspace:GetDescendants()) do
+                        if plant:IsA("Model") then
+                            local nameMatch = fruitCheckboxes[plant.Name]
+                            local mutMatch = false
+                            local mut = plant:FindFirstChild("Mutations")
+                            if mut and mut:IsA("StringValue") then
+                                for m in string.gmatch(mut.Value,"[^,]+") do
+                                    m = m:gsub("^%s+",""):gsub("%s+$","")
+                                    if mutationCheckboxes[m] then
+                                        mutMatch = true
+                                        break
+                                    end
+                                end
+                            end
+                            if nameMatch or mutMatch then
+                                local primary = plant:FindFirstChild("PrimaryPart") or plant:FindFirstChildWhichIsA("BasePart")
+                                if primary then
+                                    primary.CFrame = root.CFrame
+                                end
+                            end
+                        end
+                    end
+                end
                 task.wait(5)
             end
         end)
     else
         toggleBtn.Text = "Auto-Move: OFF"
-        toggleBtn.BackgroundColor3 = Color3.fromRGB(200, 80, 80)
+        toggleBtn.BackgroundColor3 = Color3.fromRGB(200,80,80)
     end
 end)
