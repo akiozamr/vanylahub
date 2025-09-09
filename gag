@@ -1,76 +1,28 @@
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
-
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "PetMutationChanger"
-screenGui.Parent = player:WaitForChild("PlayerGui")
-screenGui.ResetOnSpawn = false
-
-local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 300, 0, 180)
-mainFrame.Position = UDim2.new(0.7, 0, 0.3, 0)
-mainFrame.BackgroundColor3 = Color3.fromRGB(30,30,40)
-mainFrame.Active = true
-mainFrame.Draggable = true
-mainFrame.Parent = screenGui
-Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0,10)
-
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1,0,0,30)
-title.BackgroundColor3 = Color3.fromRGB(20,20,30)
-title.Text = "Pet Mutation Changer"
-title.TextColor3 = Color3.fromRGB(255,255,255)
-title.Font = Enum.Font.GothamBold
-title.TextSize = 14
-title.Parent = mainFrame
-
-local petInput = Instance.new("TextBox")
-petInput.Size = UDim2.new(0.9,0,0,28)
-petInput.Position = UDim2.new(0.05,0,0,40)
-petInput.PlaceholderText = "Nama Pet"
-petInput.TextColor3 = Color3.fromRGB(255,255,255)
-petInput.BackgroundColor3 = Color3.fromRGB(50,50,50)
-petInput.Font = Enum.Font.Gotham
-petInput.TextSize = 12
-petInput.Parent = mainFrame
-Instance.new("UICorner", petInput).CornerRadius = UDim.new(0,6)
-
-local mutationInput = Instance.new("TextBox")
-mutationInput.Size = UDim2.new(0.9,0,0,28)
-mutationInput.Position = UDim2.new(0.05,0,0,75)
-mutationInput.PlaceholderText = "Mutasi Baru"
-mutationInput.TextColor3 = Color3.fromRGB(255,255,255)
-mutationInput.BackgroundColor3 = Color3.fromRGB(50,50,50)
-mutationInput.Font = Enum.Font.Gotham
-mutationInput.TextSize = 12
-mutationInput.Parent = mainFrame
-Instance.new("UICorner", mutationInput).CornerRadius = UDim.new(0,6)
-
-local applyBtn = Instance.new("TextButton")
-applyBtn.Size = UDim2.new(0.9,0,0,28)
-applyBtn.Position = UDim2.new(0.05,0,0,110)
-applyBtn.BackgroundColor3 = Color3.fromRGB(70,140,240)
-applyBtn.Text = "Ganti Mutasi"
-applyBtn.TextColor3 = Color3.fromRGB(255,255,255)
-applyBtn.Font = Enum.Font.GothamBold
-applyBtn.TextSize = 12
-applyBtn.Parent = mainFrame
-Instance.new("UICorner", applyBtn).CornerRadius = UDim.new(0,6)
-
-local function changePetMutation()
-    local machine = workspace:FindFirstChild("MutationMachine")
-    if not machine then warn("Mutation machine tidak ditemukan!") return end
-    local petName = petInput.Text
-    local newMut = mutationInput.Text
-    if petName == "" or newMut == "" then return end
-
-    local pet = machine:FindFirstChild(petName)
-    if pet and pet:FindFirstChild("Mutations") and pet.Mutations:IsA("StringValue") then
-        pet.Mutations.Value = newMut
-        warn("Mutasi pet "..petName.." diganti menjadi "..newMut)
-    else
-        warn("Pet tidak ditemukan atau tidak memiliki Mutations")
+local machine = workspace:FindFirstChild("MutationMachine")
+if not machine then return end
+local allowedMutations = {"Wet","Twisted","Shiny","Rare"}
+local function autoCheckMutations()
+    for _, pet in pairs(machine:GetChildren()) do
+        if pet:IsA("Model") and pet:FindFirstChild("Mutations") and pet:FindFirstChild("Ready") then
+            if pet.Ready.Value then
+                local currentMut = pet.Mutations.Value
+                local matchFound = false
+                for _, m in pairs(allowedMutations) do
+                    if currentMut == m then
+                        matchFound = true
+                        break
+                    end
+                end
+                if not matchFound then
+                    pet.Mutations.Value = allowedMutations[math.random(1,#allowedMutations)]
+                end
+            end
+        end
     end
 end
-
-applyBtn.MouseButton1Click:Connect(changePetMutation)
+while true do
+    autoCheckMutations()
+    task.wait(1)
+end
