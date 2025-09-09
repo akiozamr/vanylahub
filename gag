@@ -1,28 +1,114 @@
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "PetMutationGUI"
+screenGui.Parent = player:WaitForChild("PlayerGui")
+screenGui.ResetOnSpawn = false
+
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0,320,0,400)
+mainFrame.Position = UDim2.new(0.7,0,0.2,0)
+mainFrame.BackgroundColor3 = Color3.fromRGB(30,30,40)
+mainFrame.Active = true
+mainFrame.Draggable = true
+mainFrame.Parent = screenGui
+Instance.new("UICorner",mainFrame).CornerRadius = UDim.new(0,10)
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1,0,0,30)
+title.BackgroundColor3 = Color3.fromRGB(20,20,30)
+title.Text = "Pet Mutation Checker"
+title.TextColor3 = Color3.fromRGB(255,255,255)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 14
+title.Parent = mainFrame
+
+local petFrame = Instance.new("ScrollingFrame")
+petFrame.Size = UDim2.new(1,-10,1,-40)
+petFrame.Position = UDim2.new(0,5,0,35)
+petFrame.BackgroundColor3 = Color3.fromRGB(40,40,50)
+petFrame.CanvasSize = UDim2.new(0,0,0,0)
+petFrame.ScrollBarThickness = 6
+petFrame.Parent = mainFrame
+local layout = Instance.new("UIListLayout",petFrame)
+layout.Padding = UDim.new(0,6)
+layout.SortOrder = Enum.SortOrder.LayoutOrder
+
 local machine = workspace:FindFirstChild("MutationMachine")
 if not machine then return end
 local allowedMutations = {"Wet","Twisted","Shiny","Rare"}
-local function autoCheckMutations()
+local petButtons = {}
+
+local function updatePetList()
     for _, pet in pairs(machine:GetChildren()) do
         if pet:IsA("Model") and pet:FindFirstChild("Mutations") and pet:FindFirstChild("Ready") then
-            if pet.Ready.Value then
-                local currentMut = pet.Mutations.Value
-                local matchFound = false
-                for _, m in pairs(allowedMutations) do
-                    if currentMut == m then
-                        matchFound = true
-                        break
+            if pet.Ready.Value and not petButtons[pet] then
+                local container = Instance.new("Frame")
+                container.Size = UDim2.new(1,-10,0,60)
+                container.BackgroundColor3 = Color3.fromRGB(50,50,60)
+                container.Parent = petFrame
+                Instance.new("UICorner",container).CornerRadius = UDim.new(0,6)
+
+                local nameLabel = Instance.new("TextLabel")
+                nameLabel.Size = UDim2.new(1,-10,0,20)
+                nameLabel.Position = UDim2.new(0,5,0,0)
+                nameLabel.BackgroundTransparency = 1
+                nameLabel.TextColor3 = Color3.fromRGB(255,255,255)
+                nameLabel.Font = Enum.Font.Gotham
+                nameLabel.TextSize = 12
+                nameLabel.Text = "Nama Pet: "..pet.Name
+                nameLabel.Parent = container
+
+                local mutLabel = Instance.new("TextLabel")
+                mutLabel.Size = UDim2.new(1,-10,0,20)
+                mutLabel.Position = UDim2.new(0,5,0,22)
+                mutLabel.BackgroundTransparency = 1
+                mutLabel.TextColor3 = Color3.fromRGB(255,255,255)
+                mutLabel.Font = Enum.Font.Gotham
+                mutLabel.TextSize = 12
+                mutLabel.Text = "Mutasi: "..pet.Mutations.Value
+                mutLabel.Parent = container
+
+                local btn = Instance.new("TextButton")
+                btn.Size = UDim2.new(0.9,0,0,20)
+                btn.Position = UDim2.new(0.05,0,0,44)
+                btn.BackgroundColor3 = Color3.fromRGB(70,140,240)
+                btn.TextColor3 = Color3.fromRGB(255,255,255)
+                btn.Font = Enum.Font.GothamBold
+                btn.TextSize = 12
+                btn.Text = "Ganti Mutasi"
+                btn.Parent = container
+                Instance.new("UICorner",btn).CornerRadius = UDim.new(0,6)
+
+                btn.MouseButton1Click:Connect(function()
+                    local currentMut = pet.Mutations.Value
+                    local matchFound = false
+                    for _, m in pairs(allowedMutations) do
+                        if currentMut == m then
+                            matchFound = true
+                            break
+                        end
                     end
-                end
-                if not matchFound then
-                    pet.Mutations.Value = allowedMutations[math.random(1,#allowedMutations)]
-                end
+                    if not matchFound then
+                        pet.Mutations.Value = allowedMutations[math.random(1,#allowedMutations)]
+                    end
+                    mutLabel.Text = "Mutasi: "..pet.Mutations.Value
+                end)
+
+                petButtons[pet] = {container=container,mutLabel=mutLabel}
+            elseif pet.Ready.Value and petButtons[pet] then
+                petButtons[pet].mutLabel.Text = "Mutasi: "..pet.Mutations.Value
             end
         end
     end
+    local layout = petFrame:FindFirstChildOfClass("UIListLayout")
+    if layout then
+        petFrame.CanvasSize = UDim2.new(0,0,0,layout.AbsoluteContentSize.Y)
+    end
 end
+
 while true do
-    autoCheckMutations()
-    task.wait(1)
+    updatePetList()
+    task.wait(0.5)
 end
