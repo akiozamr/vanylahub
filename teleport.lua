@@ -72,7 +72,7 @@ local coords = {
     Vector3.new(4475.3, 1452.3 - 3, 3296.4),
     Vector3.new(4501.7, 1601.4 - 3, 3127.0),
     Vector3.new(5193.8, 1858.8 - 3, 3110.7),
-    Vector3.new(5194.1, 2268.4 - 3, 173.9),
+    Vector3.new(5219.7, 2243.5 - 3, 211.3),
 }
 
 local function waitSeconds(s)
