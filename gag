@@ -1,0 +1,77 @@
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "CarrotMoveGui"
+screenGui.Parent = player:WaitForChild("PlayerGui")
+screenGui.ResetOnSpawn = false
+
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 220, 0, 80)
+mainFrame.Position = UDim2.new(0.75, 0, 0.25, 0)
+mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+mainFrame.Active = true
+mainFrame.Draggable = true
+mainFrame.Parent = screenGui
+Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 10)
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 28)
+title.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+title.Text = "Carrot Wet Move"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 14
+title.Parent = mainFrame
+
+local toggleBtn = Instance.new("TextButton")
+toggleBtn.Size = UDim2.new(0.9, 0, 0, 32)
+toggleBtn.Position = UDim2.new(0.05, 0, 0, 36)
+toggleBtn.BackgroundColor3 = Color3.fromRGB(200, 80, 80)
+toggleBtn.Text = "Auto-Move: OFF"
+toggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleBtn.Font = Enum.Font.GothamBold
+toggleBtn.TextSize = 12
+toggleBtn.Parent = mainFrame
+Instance.new("UICorner", toggleBtn).CornerRadius = UDim.new(0, 8)
+
+local autoMove = false
+
+local function moveCarrots()
+    local char = player.Character
+    if not char then return end
+    local root = char:FindFirstChild("HumanoidRootPart")
+    if not root then return end
+
+    for _, plant in pairs(workspace:GetDescendants()) do
+        if plant:IsA("Model") and plant.Name == "Carrot" then
+            local mutations = plant:FindFirstChild("Mutations")
+            if mutations and mutations:IsA("StringValue") then
+                if string.find(mutations.Value:lower(), "wet") then
+                    local primary = plant:FindFirstChild("PrimaryPart") or plant:FindFirstChildWhichIsA("BasePart")
+                    if primary then
+                        primary.CFrame = root.CFrame + Vector3.new(0,0,0)
+                        warn("Carrot Wet dipindahkan ke posisi player!")
+                    end
+                end
+            end
+        end
+    end
+end
+
+toggleBtn.MouseButton1Click:Connect(function()
+    autoMove = not autoMove
+    if autoMove then
+        toggleBtn.Text = "Auto-Move: ON"
+        toggleBtn.BackgroundColor3 = Color3.fromRGB(80, 200, 80)
+        task.spawn(function()
+            while autoMove do
+                moveCarrots()
+                task.wait(5)
+            end
+        end)
+    else
+        toggleBtn.Text = "Auto-Move: OFF"
+        toggleBtn.BackgroundColor3 = Color3.fromRGB(200, 80, 80)
+    end
+end)
