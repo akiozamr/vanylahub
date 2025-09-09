@@ -12,7 +12,6 @@ local humanoid = character:WaitForChild("Humanoid")
 local unlimitedJump = false
 local isOptimized = false
 local isUltraMode = false
-local isGodMode = false
 local originalSettings = {}
 local optimizedParts = {}
 local isMinimized = false
@@ -24,8 +23,8 @@ screenGui.Parent = player:WaitForChild("PlayerGui")
 screenGui.ResetOnSpawn = false
 
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 300, 0, 320)
-mainFrame.Position = UDim2.new(0.5, -150, 0.4, -160)
+mainFrame.Size = UDim2.new(0, 300, 0, 280)
+mainFrame.Position = UDim2.new(0.5, -150, 0.4, -140)
 mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
 mainFrame.BorderSizePixel = 0
 mainFrame.Active = true
@@ -114,210 +113,146 @@ jpBtn.Parent = contentFrame
 Instance.new("UICorner", jpBtn).CornerRadius = UDim.new(0, 6)
 
 local ujBtn = Instance.new("TextButton")
-ujBtn.Size = UDim2.new(0.9, 0, 0, 30)
+ujBtn.Size = UDim2.new(0.9, 0, 0, 25)
 ujBtn.Position = UDim2.new(0.05, 0, 0, 75)
 ujBtn.Text = "Unlimited Jump: OFF"
-ujBtn.BackgroundColor3 = Color3.fromRGB(200, 80, 80)
+ujBtn.BackgroundColor3 = Color3.fromRGB(200, 100, 100)
 ujBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 ujBtn.TextSize = 14
 ujBtn.Font = Enum.Font.GothamBold
 ujBtn.Parent = contentFrame
-Instance.new("UICorner", ujBtn).CornerRadius = UDim.new(0, 8)
-
-local godBtn = Instance.new("TextButton")
-godBtn.Size = UDim2.new(0.9, 0, 0, 30)
-godBtn.Position = UDim2.new(0.05, 0, 0, 110)
-godBtn.Text = "God Mode: OFF"
-godBtn.BackgroundColor3 = Color3.fromRGB(200, 80, 200)
-godBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-godBtn.TextSize = 14
-godBtn.Font = Enum.Font.GothamBold
-godBtn.Parent = contentFrame
-Instance.new("UICorner", godBtn).CornerRadius = UDim.new(0, 8)
+Instance.new("UICorner", ujBtn).CornerRadius = UDim.new(0, 6)
 
 local fpsLabel = Instance.new("TextLabel")
-fpsLabel.Size = UDim2.new(0.5, -5, 0, 20)
-fpsLabel.Position = UDim2.new(0, 0, 0, 150)
-fpsLabel.BackgroundTransparency = 1
-fpsLabel.Text = "FPS: --"
-fpsLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
-fpsLabel.TextSize = 12
+fpsLabel.Size = UDim2.new(0.9, 0, 0, 25)
+fpsLabel.Position = UDim2.new(0.05, 0, 0, 110)
+fpsLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+fpsLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
+fpsLabel.TextSize = 14
 fpsLabel.Font = Enum.Font.GothamBold
-fpsLabel.TextXAlignment = Enum.TextXAlignment.Left
+fpsLabel.Text = "FPS: 0"
 fpsLabel.Parent = contentFrame
+Instance.new("UICorner", fpsLabel).CornerRadius = UDim.new(0, 6)
 
 local coordLabel = Instance.new("TextLabel")
-coordLabel.Size = UDim2.new(1, -10, 0, 20)
-coordLabel.Position = UDim2.new(0, 0, 0, 175)
-coordLabel.BackgroundTransparency = 1
-coordLabel.Text = "XYZ: 0, 0, 0"
-coordLabel.TextColor3 = Color3.fromRGB(150, 200, 255)
-coordLabel.TextSize = 12
-coordLabel.Font = Enum.Font.Gotham
-coordLabel.TextXAlignment = Enum.TextXAlignment.Left
+coordLabel.Size = UDim2.new(0.9, 0, 0, 25)
+coordLabel.Position = UDim2.new(0.05, 0, 0, 145)
+coordLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+coordLabel.TextColor3 = Color3.fromRGB(255, 255, 0)
+coordLabel.TextSize = 14
+coordLabel.Font = Enum.Font.GothamBold
+coordLabel.Text = "XYZ: 0,0,0"
 coordLabel.Parent = contentFrame
-
-local statusLabel = Instance.new("TextLabel")
-statusLabel.Size = UDim2.new(0.5, -5, 0, 20)
-statusLabel.Position = UDim2.new(0.5, 5, 0, 150)
-statusLabel.BackgroundTransparency = 1
-statusLabel.Text = "Ready"
-statusLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
-statusLabel.TextSize = 10
-statusLabel.Font = Enum.Font.Gotham
-statusLabel.TextXAlignment = Enum.TextXAlignment.Right
-statusLabel.Parent = contentFrame
+Instance.new("UICorner", coordLabel).CornerRadius = UDim.new(0, 6)
 
 local optimizeBtn = Instance.new("TextButton")
-optimizeBtn.Size = UDim2.new(1, 0, 0, 30)
-optimizeBtn.Position = UDim2.new(0, 0, 0, 200)
-optimizeBtn.BackgroundColor3 = Color3.fromRGB(50, 150, 250)
-optimizeBtn.Text = "⚡ OPTIMIZE"
+optimizeBtn.Size = UDim2.new(0.9, 0, 0, 25)
+optimizeBtn.Position = UDim2.new(0.05, 0, 0, 180)
+optimizeBtn.Text = "Optimize Mode"
+optimizeBtn.BackgroundColor3 = Color3.fromRGB(100, 100, 250)
 optimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 optimizeBtn.TextSize = 14
 optimizeBtn.Font = Enum.Font.GothamBold
-optimizeBtn.BorderSizePixel = 0
 optimizeBtn.Parent = contentFrame
-
-local resetBtn = Instance.new("TextButton")
-resetBtn.Size = UDim2.new(0.48, 0, 0, 25)
-resetBtn.Position = UDim2.new(0, 0, 0, 235)
-resetBtn.BackgroundColor3 = Color3.fromRGB(150, 50, 50)
-resetBtn.Text = "RESET"
-resetBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-resetBtn.TextSize = 11
-resetBtn.Font = Enum.Font.Gotham
-resetBtn.BorderSizePixel = 0
-resetBtn.Parent = contentFrame
+Instance.new("UICorner", optimizeBtn).CornerRadius = UDim.new(0, 6)
 
 local ultraBtn = Instance.new("TextButton")
-ultraBtn.Size = UDim2.new(0.48, 0, 0, 25)
-ultraBtn.Position = UDim2.new(0.52, 0, 0, 235)
-ultraBtn.BackgroundColor3 = Color3.fromRGB(255, 100, 50)
-ultraBtn.Text = "ULTRA"
+ultraBtn.Size = UDim2.new(0.9, 0, 0, 25)
+ultraBtn.Position = UDim2.new(0.05, 0, 0, 215)
+ultraBtn.Text = "Ultra Optimize"
+ultraBtn.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
 ultraBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-ultraBtn.TextSize = 11
+ultraBtn.TextSize = 14
 ultraBtn.Font = Enum.Font.GothamBold
-ultraBtn.BorderSizePixel = 0
 ultraBtn.Parent = contentFrame
-
-local function rgbLoop(textLabel)
-    coroutine.wrap(function()
-        while task.wait() do
-            TweenService:Create(textLabel, TweenInfo.new(2), {TextColor3 = Color3.fromRGB(0,255,0)}):Play()
-            task.wait(2)
-            TweenService:Create(textLabel, TweenInfo.new(2), {TextColor3 = Color3.fromRGB(0,0,255)}):Play()
-            task.wait(2)
-            TweenService:Create(textLabel, TweenInfo.new(2), {TextColor3 = Color3.fromRGB(255,0,0)}):Play()
-            task.wait(2)
-        end
-    end)()
-end
-rgbLoop(titleText)
+Instance.new("UICorner", ultraBtn).CornerRadius = UDim.new(0, 6)
 
 wsBtn.MouseButton1Click:Connect(function()
-    local v = tonumber(wsBox.Text)
-    if v and v > 0 then humanoid.WalkSpeed = v else wsBox.Text = humanoid.WalkSpeed end
+    local val = tonumber(wsBox.Text)
+    if val then humanoid.WalkSpeed = val end
 end)
 
 jpBtn.MouseButton1Click:Connect(function()
-    local v = tonumber(jpBox.Text)
-    if v and v > 0 then humanoid.UseJumpPower, humanoid.JumpPower = true, v else jpBox.Text = humanoid.JumpPower end
+    local val = tonumber(jpBox.Text)
+    if val then humanoid.JumpPower = val end
 end)
 
 ujBtn.MouseButton1Click:Connect(function()
     unlimitedJump = not unlimitedJump
-    ujBtn.Text = unlimitedJump and "Unlimited Jump: ON" or "Unlimited Jump: OFF"
-    ujBtn.BackgroundColor3 = unlimitedJump and Color3.fromRGB(80,200,80) or Color3.fromRGB(200,80,80)
-end)
-
-godBtn.MouseButton1Click:Connect(function()
-    isGodMode = not isGodMode
-    godBtn.Text = isGodMode and "God Mode: ON" or "God Mode: OFF"
-    godBtn.BackgroundColor3 = isGodMode and Color3.fromRGB(80,80,200) or Color3.fromRGB(200,80,200)
+    ujBtn.Text = "Unlimited Jump: " .. (unlimitedJump and "ON" or "OFF")
+    ujBtn.BackgroundColor3 = unlimitedJump and Color3.fromRGB(100, 200, 100) or Color3.fromRGB(200, 100, 100)
 end)
 
 UserInputService.JumpRequest:Connect(function()
     if unlimitedJump and humanoid then humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end
 end)
 
-player.CharacterAdded:Connect(function(char)
-    character = char
-    humanoid = char:WaitForChild("Humanoid")
-end)
-
-RunService.Heartbeat:Connect(function()
+RunService.RenderStepped:Connect(function()
     frameCount += 1
     local now = tick()
-    if now - lastTime >= 0.5 then
-        fps = frameCount / (now - lastTime)
-        frameCount, lastTime = 0, now
-        local c = fps>=50 and Color3.fromRGB(100,255,100) or fps>=30 and Color3.fromRGB(255,255,100) or Color3.fromRGB(255,100,100)
-        fpsLabel.Text, fpsLabel.TextColor3 = ("FPS: %.0f"):format(fps), c
+    if now - lastTime >= 1 then
+        fps = frameCount
+        frameCount = 0
+        lastTime = now
+        fpsLabel.Text = "FPS: " .. fps
     end
-    if character and character:FindFirstChild("HumanoidRootPart") then
-        local pos = character.HumanoidRootPart.Position
-        coordLabel.Text = ("XYZ: %d, %d, %d"):format(pos.X, pos.Y, pos.Z)
-    end
-    if isGodMode and humanoid and humanoid.Health > 0 then
-        humanoid.Health = math.huge
+    local root = character:FindFirstChild("HumanoidRootPart")
+    if root then
+        local pos = root.Position
+        coordLabel.Text = string.format("XYZ: %.1f, %.1f, %.1f", pos.X, pos.Y, pos.Z)
     end
 end)
 
-local function saveOriginal()
-    originalSettings = {
-        StreamingEnabled = Workspace.StreamingEnabled,
-        GlobalShadows = Lighting.GlobalShadows,
-        FogEnd = Lighting.FogEnd,
-        FogStart = Lighting.FogStart,
-        Brightness = Lighting.Brightness,
-        Technology = Lighting.Technology,
-        Ambient = Lighting.Ambient,
-        OutdoorAmbient = Lighting.OutdoorAmbient,
-        ClockTime = Lighting.ClockTime,
-    }
-end
-
-local function optimize()
-    if isOptimized then return end
-    statusLabel.Text, statusLabel.TextColor3 = "Optimizing...", Color3.fromRGB(255,200,100)
-    saveOriginal()
-    Workspace.StreamingEnabled = true
-    Lighting.GlobalShadows = false
-    Lighting.Technology = Enum.Technology.Compatibility
-    Lighting.FogEnd, Lighting.FogStart, Lighting.Brightness = 1e6, 1e6, 3
-    Lighting.Ambient, Lighting.OutdoorAmbient, Lighting.ClockTime = Color3.new(.5,.5,.5), Color3.new(.5,.5,.5), 14
-    Lighting.ShadowSoftness = 0
-    for _, obj in ipairs(Workspace:GetDescendants()) do
-        if obj:IsA("BasePart") then
-            obj.TopSurface, obj.BottomSurface, obj.Material, obj.CastShadow = Enum.SurfaceType.Smooth, Enum.SurfaceType.Smooth, Enum.Material.SmoothPlastic, false
-            table.insert(optimizedParts, obj)
-        elseif obj:IsA("ParticleEmitter") or obj:IsA("Fire") or obj:IsA("Smoke") or obj:IsA("Sparkles") then obj.Enabled = false
-        elseif obj:IsA("Atmosphere") then obj.Density, obj.Offset, obj.Glare, obj.Haze = 0,0,0,0
-        elseif obj:IsA("Clouds") then obj.Enabled, obj.Density = false, 0
-        elseif obj:IsA("BloomEffect") or obj:IsA("BlurEffect") or obj:IsA("ColorCorrectionEffect") then obj.Enabled = false end
+local function optimizeGame()
+    if isOptimized then
+        for _, part in ipairs(optimizedParts) do
+            if part:IsA("BasePart") then part.Material = originalSettings[part] or part.Material end
+        end
+        Lighting.GlobalShadows = true
+        isOptimized = false
+        optimizeBtn.Text = "Optimize Mode"
+        optimizeBtn.BackgroundColor3 = Color3.fromRGB(100, 100, 250)
+    else
+        optimizedParts = {}
+        for _, part in ipairs(Workspace:GetDescendants()) do
+            if part:IsA("BasePart") then
+                originalSettings[part] = part.Material
+                part.Material = Enum.Material.SmoothPlastic
+                table.insert(optimizedParts, part)
+            end
+        end
+        Lighting.GlobalShadows = false
+        isOptimized = true
+        optimizeBtn.Text = "Restore Graphics"
+        optimizeBtn.BackgroundColor3 = Color3.fromRGB(100, 200, 100)
     end
-    isOptimized = true
-    statusLabel.Text, statusLabel.TextColor3 = "Optimized ✓", Color3.fromRGB(100,255,100)
-    optimizeBtn.Text, optimizeBtn.BackgroundColor3 = "✓ OPTIMIZED", Color3.fromRGB(50,200,50)
 end
 
-local function ultra()
-    if isUltraMode then return end
-    statusLabel.Text, statusLabel.TextColor3 = "Ultra Mode...", Color3.fromRGB(255,150,50)
-    if not isOptimized then optimize() end
-    Lighting.GlobalShadows = false
-    Lighting.Technology = Enum.Technology.Legacy
-    Lighting.FogEnd, Lighting.FogStart, Lighting.Brightness = 1e6, 1e6, 5
-    Lighting.Ambient, Lighting.OutdoorAmbient = Color3.fromRGB(178,178,178), Color3.fromRGB(178,178,178)
-    for _, obj in ipairs(optimizedParts) do
-        if obj and obj.Parent then obj.Material, obj.Reflectance, obj.CastShadow = Enum.Material.Plastic, 0, false end
+optimizeBtn.MouseButton1Click:Connect(optimizeGame)
+
+ultraBtn.MouseButton1Click:Connect(function()
+    if isUltraMode then
+        Lighting.GlobalShadows = true
+        for _, v in pairs(Workspace:GetDescendants()) do
+            if v:IsA("BasePart") then v.Material = originalSettings[v] or v.Material end
+        end
+        isUltraMode = false
+        ultraBtn.Text = "Ultra Optimize"
+        ultraBtn.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
+    else
+        for _, v in pairs(Workspace:GetDescendants()) do
+            if v:IsA("BasePart") then v.Material = Enum.Material.SmoothPlastic end
+        end
+        Lighting.GlobalShadows = false
+        isUltraMode = true
+        ultraBtn.Text = "Restore Ultra"
+        ultraBtn.BackgroundColor3 = Color3.fromRGB(100, 200, 100)
     end
-    isUltraMode = true
-    statusLabel.Text, statusLabel.TextColor3 = "Ultra ✓", Color3.fromRGB(255,100,50)
-    ultraBtn.Text, ultraBtn.BackgroundColor3 = "✓ ULTRA", Color3.fromRGB(255,150,50)
-end
+end)
 
-local function reset()
-    statusLabel.Text, statusLabel.TextColor3 = "Resetting...", Color3.fromRGB(255,200,100)
-    Workspace.StreamingEnabled = originalSettings.StreamingEnabled or false
+minimizeBtn.MouseButton1Click:Connect(function()
+    isMinimized = not isMinimized
+    contentFrame.Visible = not isMinimized
+    minimizeBtn.Text = isMinimized and "+" or "−"
+    mainFrame.Size = isMinimized and UDim2.new(0, 300, 0, 30) or UDim2.new(0, 300, 0, 280)
+end)
