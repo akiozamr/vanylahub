@@ -1,13 +1,12 @@
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 
--- GUI
 local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
 gui.Name = "CoordTracker"
 
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 300, 0, 200)
-frame.Position = UDim2.new(0.5, -150, 0.4, -100)
+frame.Size = UDim2.new(0, 300, 0, 220)
+frame.Position = UDim2.new(0.5, -150, 0.4, -110)
 frame.BackgroundColor3 = Color3.fromRGB(20,20,30)
 frame.Active = true
 frame.Draggable = true
@@ -23,21 +22,29 @@ title.TextColor3 = Color3.fromRGB(255,255,255)
 title.TextSize = 16
 Instance.new("UICorner", title).CornerRadius = UDim.new(0, 10)
 
--- Tombol track Icella2
+local targetBox = Instance.new("TextBox", frame)
+targetBox.Size = UDim2.new(0.9,0,0,30)
+targetBox.Position = UDim2.new(0.05,0,0,40)
+targetBox.PlaceholderText = "Nama Player"
+targetBox.BackgroundColor3 = Color3.fromRGB(50,50,70)
+targetBox.TextColor3 = Color3.fromRGB(255,255,255)
+targetBox.Font = Enum.Font.Gotham
+targetBox.TextSize = 14
+Instance.new("UICorner", targetBox).CornerRadius = UDim.new(0,6)
+
 local trackBtn = Instance.new("TextButton", frame)
 trackBtn.Size = UDim2.new(0.9,0,0,30)
-trackBtn.Position = UDim2.new(0.05,0,0,40)
+trackBtn.Position = UDim2.new(0.05,0,0,80)
 trackBtn.BackgroundColor3 = Color3.fromRGB(100,150,250)
-trackBtn.Text = "Lacak Icella2 (Copy Koordinat)"
+trackBtn.Text = "Lacak & Copy Koordinat"
 trackBtn.TextColor3 = Color3.fromRGB(255,255,255)
 trackBtn.Font = Enum.Font.GothamBold
 trackBtn.TextSize = 14
 Instance.new("UICorner", trackBtn).CornerRadius = UDim.new(0,6)
 
--- Input Teleport
 local inputBox = Instance.new("TextBox", frame)
 inputBox.Size = UDim2.new(0.9,0,0,30)
-inputBox.Position = UDim2.new(0.05,0,0,80)
+inputBox.Position = UDim2.new(0.05,0,0,120)
 inputBox.PlaceholderText = "X,Y,Z"
 inputBox.BackgroundColor3 = Color3.fromRGB(50,50,70)
 inputBox.TextColor3 = Color3.fromRGB(255,255,255)
@@ -47,7 +54,7 @@ Instance.new("UICorner", inputBox).CornerRadius = UDim.new(0,6)
 
 local tpBtn = Instance.new("TextButton", frame)
 tpBtn.Size = UDim2.new(0.9,0,0,30)
-tpBtn.Position = UDim2.new(0.05,0,0,120)
+tpBtn.Position = UDim2.new(0.05,0,0,160)
 tpBtn.BackgroundColor3 = Color3.fromRGB(100,200,100)
 tpBtn.Text = "Teleport ke Koordinat"
 tpBtn.TextColor3 = Color3.fromRGB(255,255,255)
@@ -55,26 +62,26 @@ tpBtn.Font = Enum.Font.GothamBold
 tpBtn.TextSize = 14
 Instance.new("UICorner", tpBtn).CornerRadius = UDim.new(0,6)
 
--- Fungsi copy koordinat Icella2
 trackBtn.MouseButton1Click:Connect(function()
-    local target = Players:FindFirstChild("Icella2")
+    local targetName = targetBox.Text
+    local target = Players:FindFirstChild(targetName)
     if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
         local pos = target.Character.HumanoidRootPart.Position
         local coord = string.format("%.1f, %.1f, %.1f", pos.X, pos.Y, pos.Z)
         if setclipboard then
             setclipboard(coord)
         end
+        inputBox.Text = coord
         trackBtn.Text = "Koordinat Dicopy!"
         task.wait(1.5)
-        trackBtn.Text = "Lacak Icella2 (Copy Koordinat)"
+        trackBtn.Text = "Lacak & Copy Koordinat"
     else
-        trackBtn.Text = "Icella2 Tidak Ada!"
+        trackBtn.Text = "Player Tidak Ditemukan!"
         task.wait(1.5)
-        trackBtn.Text = "Lacak Icella2 (Copy Koordinat)"
+        trackBtn.Text = "Lacak & Copy Koordinat"
     end
 end)
 
--- Fungsi teleport ke koordinat input
 tpBtn.MouseButton1Click:Connect(function()
     local coords = string.split(inputBox.Text, ",")
     if #coords == 3 then
