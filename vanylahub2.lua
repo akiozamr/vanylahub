@@ -108,7 +108,6 @@ createTab("Teleport",3)
 tabs["Player"].Page.Visible = true
 tabs["Player"].Button.BackgroundColor3 = Color3.fromRGB(100,100,200)
 
--- === Player Tab ===
 local wsBox = Instance.new("TextBox")
 wsBox.Size = UDim2.new(0.6, -10, 0, 25)
 wsBox.Position = UDim2.new(0, 10, 0, 5)
@@ -186,7 +185,6 @@ coordLabel.Text = "XYZ: 0,0,0"
 coordLabel.Parent = tabs["Player"].Page
 Instance.new("UICorner", coordLabel).CornerRadius = UDim.new(0, 6)
 
--- === Optifine Tab ===
 local optimizeBtn = Instance.new("TextButton")
 optimizeBtn.Size = UDim2.new(0.9, 0, 0, 25)
 optimizeBtn.Position = UDim2.new(0.05, 0, 0, 5)
@@ -209,11 +207,10 @@ ultraBtn.Font = Enum.Font.GothamBold
 ultraBtn.Parent = tabs["Optifine"].Page
 Instance.new("UICorner", ultraBtn).CornerRadius = UDim.new(0, 6)
 
--- === Teleport Tab ===
 local teleportPage = tabs["Teleport"].Page
 local teleportList = Instance.new("Frame")
-teleportList.Size = UDim2.new(1, 0, 1, -170)
-teleportList.Position = UDim2.new(0, 0, 0, 160)
+teleportList.Size = UDim2.new(1, 0, 1, -40)
+teleportList.Position = UDim2.new(0, 0, 0, 35)
 teleportList.BackgroundTransparency = 1
 teleportList.Parent = teleportPage
 
@@ -227,25 +224,6 @@ saveBtn.TextSize = 14
 saveBtn.Font = Enum.Font.GothamBold
 saveBtn.Parent = teleportPage
 Instance.new("UICorner", saveBtn).CornerRadius = UDim.new(0, 6)
-
-local otherPlayerLabel = Instance.new("TextLabel")
-otherPlayerLabel.Size = UDim2.new(0.9, 0, 0, 25)
-otherPlayerLabel.Position = UDim2.new(0.05, 0, 0, 40)
-otherPlayerLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-otherPlayerLabel.TextColor3 = Color3.fromRGB(255, 255, 0)
-otherPlayerLabel.TextSize = 14
-otherPlayerLabel.Font = Enum.Font.GothamBold
-otherPlayerLabel.Text = "Pilih Player:"
-otherPlayerLabel.Parent = teleportPage
-Instance.new("UICorner", otherPlayerLabel).CornerRadius = UDim.new(0, 6)
-
-local playerListFrame = Instance.new("Frame")
-playerListFrame.Size = UDim2.new(0.9, 0, 0, 100)
-playerListFrame.Position = UDim2.new(0.05, 0, 0, 70)
-playerListFrame.BackgroundColor3 = Color3.fromRGB(30,30,40)
-playerListFrame.BorderSizePixel = 0
-playerListFrame.Parent = teleportPage
-Instance.new("UICorner", playerListFrame).CornerRadius = UDim.new(0,6)
 
 local function refreshTeleportList()
     for _,child in pairs(teleportList:GetChildren()) do
@@ -277,46 +255,6 @@ saveBtn.MouseButton1Click:Connect(function()
     end
 end)
 
-local function refreshPlayerList()
-    for _,child in pairs(playerListFrame:GetChildren()) do
-        if child:IsA("TextButton") then child:Destroy() end
-    end
-    local y = 5
-    for _,plr in pairs(Players:GetPlayers()) do
-        if plr ~= player then
-            local btn = Instance.new("TextButton")
-            btn.Size = UDim2.new(1, -10, 0, 25)
-            btn.Position = UDim2.new(0, 5, 0, y)
-            btn.Text = plr.Name
-            btn.BackgroundColor3 = Color3.fromRGB(100,100,200)
-            btn.TextColor3 = Color3.fromRGB(255,255,255)
-            btn.Font = Enum.Font.GothamBold
-            btn.TextSize = 14
-            btn.Parent = playerListFrame
-            Instance.new("UICorner", btn).CornerRadius = UDim.new(0,6)
-
-            btn.MouseButton1Click:Connect(function()
-                local targetChar = plr.Character
-                local root = targetChar and targetChar:FindFirstChild("HumanoidRootPart")
-                if root then
-                    coordLabel.Text = string.format("Target %s XYZ: %.1f, %.1f, %.1f", plr.Name, root.Position.X, root.Position.Y, root.Position.Z)
-                    local myRoot = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-                    if myRoot then
-                        myRoot.CFrame = CFrame.new(root.Position + Vector3.new(0,3,0))
-                    end
-                end
-            end)
-
-            y = y + 30
-        end
-    end
-end
-
-Players.PlayerAdded:Connect(refreshPlayerList)
-Players.PlayerRemoving:Connect(refreshPlayerList)
-refreshPlayerList()
-
--- === Logic Setup ===
 local function setupCharacter(char)
     humanoid = char:WaitForChild("Humanoid")
     wsBox.Text = tostring(humanoid.WalkSpeed)
@@ -362,9 +300,7 @@ end)
 local function optimizeGame()
     if isOptimized then
         for _, part in ipairs(optimizedParts) do
-            if part:IsA("BasePart") then 
-                part.Material = originalSettings[part] or part.Material 
-            end
+            if part:IsA("BasePart") then part.Material = originalSettings[part] or part.Material end
         end
         Lighting.GlobalShadows = true
         isOptimized = false
@@ -393,18 +329,14 @@ ultraBtn.MouseButton1Click:Connect(function()
         Lighting.GlobalShadows = true
         Lighting.Brightness = 2
         for _, v in pairs(Workspace:GetDescendants()) do
-            if v:IsA("BasePart") then 
-                v.Material = originalSettings[v] or v.Material 
-            end
+            if v:IsA("BasePart") then v.Material = originalSettings[v] or v.Material end
         end
         isUltraMode = false
         ultraBtn.Text = "Ultra Optimize"
         ultraBtn.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
     else
         for _, v in pairs(Workspace:GetDescendants()) do
-            if v:IsA("BasePart") then 
-                v.Material = Enum.Material.SmoothPlastic 
-            end
+            if v:IsA("BasePart") then v.Material = Enum.Material.SmoothPlastic end
         end
         Lighting.GlobalShadows = false
         Lighting.Brightness = 5
