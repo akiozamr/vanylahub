@@ -2,12 +2,12 @@ local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 
 local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
-gui.Name = "CoordTracker"
+gui.Name = "TeleportCheckpoint"
 
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 300, 0, 220)
-frame.Position = UDim2.new(0.5, -150, 0.4, -110)
-frame.BackgroundColor3 = Color3.fromRGB(20,20,30)
+frame.Size = UDim2.new(0, 320, 0, 400)
+frame.Position = UDim2.new(0.5, -160, 0.4, -200)
+frame.BackgroundColor3 = Color3.fromRGB(25,25,35)
 frame.Active = true
 frame.Draggable = true
 frame.Parent = gui
@@ -16,83 +16,48 @@ Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 10)
 local title = Instance.new("TextLabel", frame)
 title.Size = UDim2.new(1,0,0,30)
 title.BackgroundColor3 = Color3.fromRGB(40,40,60)
-title.Text = "Coordinate Tools"
+title.Text = "Teleport Checkpoint"
 title.Font = Enum.Font.GothamBold
 title.TextColor3 = Color3.fromRGB(255,255,255)
 title.TextSize = 16
 Instance.new("UICorner", title).CornerRadius = UDim.new(0, 10)
 
-local targetBox = Instance.new("TextBox", frame)
-targetBox.Size = UDim2.new(0.9,0,0,30)
-targetBox.Position = UDim2.new(0.05,0,0,40)
-targetBox.PlaceholderText = "Nama Player"
-targetBox.BackgroundColor3 = Color3.fromRGB(50,50,70)
-targetBox.TextColor3 = Color3.fromRGB(255,255,255)
-targetBox.Font = Enum.Font.Gotham
-targetBox.TextSize = 14
-Instance.new("UICorner", targetBox).CornerRadius = UDim.new(0,6)
+local scroll = Instance.new("ScrollingFrame", frame)
+scroll.Size = UDim2.new(1, -10, 1, -40)
+scroll.Position = UDim2.new(0, 5, 0, 35)
+scroll.BackgroundTransparency = 1
+scroll.CanvasSize = UDim2.new(0,0,0,0)
+scroll.ScrollBarThickness = 6
 
-local trackBtn = Instance.new("TextButton", frame)
-trackBtn.Size = UDim2.new(0.9,0,0,30)
-trackBtn.Position = UDim2.new(0.05,0,0,80)
-trackBtn.BackgroundColor3 = Color3.fromRGB(100,150,250)
-trackBtn.Text = "Lacak & Copy Koordinat"
-trackBtn.TextColor3 = Color3.fromRGB(255,255,255)
-trackBtn.Font = Enum.Font.GothamBold
-trackBtn.TextSize = 14
-Instance.new("UICorner", trackBtn).CornerRadius = UDim.new(0,6)
+local UIList = Instance.new("UIListLayout", scroll)
+UIList.Padding = UDim.new(0,5)
+UIList.SortOrder = Enum.SortOrder.LayoutOrder
 
-local inputBox = Instance.new("TextBox", frame)
-inputBox.Size = UDim2.new(0.9,0,0,30)
-inputBox.Position = UDim2.new(0.05,0,0,120)
-inputBox.PlaceholderText = "X,Y,Z"
-inputBox.BackgroundColor3 = Color3.fromRGB(50,50,70)
-inputBox.TextColor3 = Color3.fromRGB(255,255,255)
-inputBox.Font = Enum.Font.Gotham
-inputBox.TextSize = 14
-Instance.new("UICorner", inputBox).CornerRadius = UDim.new(0,6)
-
-local tpBtn = Instance.new("TextButton", frame)
-tpBtn.Size = UDim2.new(0.9,0,0,30)
-tpBtn.Position = UDim2.new(0.05,0,0,160)
-tpBtn.BackgroundColor3 = Color3.fromRGB(100,200,100)
-tpBtn.Text = "Teleport ke Koordinat"
-tpBtn.TextColor3 = Color3.fromRGB(255,255,255)
-tpBtn.Font = Enum.Font.GothamBold
-tpBtn.TextSize = 14
-Instance.new("UICorner", tpBtn).CornerRadius = UDim.new(0,6)
-
-trackBtn.MouseButton1Click:Connect(function()
-    local targetName = targetBox.Text
-    local target = Players:FindFirstChild(targetName)
-    if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
-        local pos = target.Character.HumanoidRootPart.Position
-        local coord = string.format("%.1f, %.1f, %.1f", pos.X, pos.Y, pos.Z)
-        if setclipboard then
-            setclipboard(coord)
-        end
-        inputBox.Text = coord
-        trackBtn.Text = "Koordinat Dicopy!"
-        task.wait(1.5)
-        trackBtn.Text = "Lacak & Copy Koordinat"
-    else
-        trackBtn.Text = "Player Tidak Ditemukan!"
-        task.wait(1.5)
-        trackBtn.Text = "Lacak & Copy Koordinat"
+local function teleportTo(part)
+    local char = player.Character
+    if char and char:FindFirstChild("HumanoidRootPart") then
+        char.HumanoidRootPart.CFrame = part.CFrame + Vector3.new(0,5,0)
     end
-end)
+end
 
-tpBtn.MouseButton1Click:Connect(function()
-    local coords = string.split(inputBox.Text, ",")
-    if #coords == 3 then
-        local x = tonumber(coords[1])
-        local y = tonumber(coords[2])
-        local z = tonumber(coords[3])
-        if x and y and z then
-            local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-            if root then
-                root.CFrame = CFrame.new(x,y,z)
-            end
-        end
+local function addCheckpointButton(part)
+    local btn = Instance.new("TextButton", scroll)
+    btn.Size = UDim2.new(1, -10, 0, 30)
+    btn.Text = "Checkpoint: " .. part.Name
+    btn.BackgroundColor3 = Color3.fromRGB(100,150,250)
+    btn.TextColor3 = Color3.fromRGB(255,255,255)
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 14
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0,6)
+    btn.MouseButton1Click:Connect(function()
+        teleportTo(part)
+    end)
+end
+
+for _,obj in ipairs(workspace:GetDescendants()) do
+    if obj:IsA("BasePart") and (obj.Name:lower():find("checkpoint") or obj.Name:lower():find("spawn")) then
+        addCheckpointButton(obj)
     end
-end)
+end
+
+scroll.CanvasSize = UDim2.new(0,0,0,UIList.AbsoluteContentSize.Y)
