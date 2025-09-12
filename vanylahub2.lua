@@ -463,7 +463,21 @@ end)
 
 minimizeBtn.MouseButton1Click:Connect(function()
     isMinimized = not isMinimized
-    contentFrame.Visible = not isMinimized
-    tabFrame.Visible = not isMinimized
-    minimizeBtn.Text = isMinimized and "+" or "−"
+    if isMinimized then
+        for _, child in ipairs(mainFrame:GetChildren()) do
+            if child ~= titleBar then
+                child.Visible = false
+            end
+        end
+        mainFrame.Size = UDim2.new(0, 350, 0, 30)
+        minimizeBtn.Text = "+"
+    else
+        for _, child in ipairs(mainFrame:GetChildren()) do
+            if child ~= titleBar then
+                child.Visible = true
+            end
+        end
+        mainFrame.Size = UDim2.new(0, 350, 0, 320)
+        minimizeBtn.Text = "−"
+    end
 end)
