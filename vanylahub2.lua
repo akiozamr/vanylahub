@@ -185,100 +185,103 @@ coordLabel.Text = "XYZ: 0,0,0"
 coordLabel.Parent = tabs["Player"].Page
 Instance.new("UICorner", coordLabel).CornerRadius = UDim.new(0, 6)
 
-local optimizeBtn = Instance.new("TextButton")
-optimizeBtn.Size = UDim2.new(0.9, 0, 0, 25)
-optimizeBtn.Position = UDim2.new(0.05, 0, 0, 5)
-optimizeBtn.Text = "Optimize Mode"
-optimizeBtn.BackgroundColor3 = Color3.fromRGB(100, 100, 250)
-optimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-optimizeBtn.TextSize = 14
-optimizeBtn.Font = Enum.Font.GothamBold
-optimizeBtn.Parent = tabs["Optifine"].Page
-Instance.new("UICorner", optimizeBtn).CornerRadius = UDim.new(0, 6)
+local optBtn = Instance.new("TextButton")
+optBtn.Size = UDim2.new(0.9, 0, 0, 25)
+optBtn.Position = UDim2.new(0.05, 0, 0, 5)
+optBtn.Text = "Optimize Mode"
+optBtn.BackgroundColor3 = Color3.fromRGB(100,200,100)
+optBtn.TextColor3 = Color3.fromRGB(255,255,255)
+optBtn.TextSize = 14
+optBtn.Font = Enum.Font.GothamBold
+optBtn.Parent = tabs["Optifine"].Page
+Instance.new("UICorner", optBtn).CornerRadius = UDim.new(0,6)
 
 local ultraBtn = Instance.new("TextButton")
 ultraBtn.Size = UDim2.new(0.9, 0, 0, 25)
 ultraBtn.Position = UDim2.new(0.05, 0, 0, 40)
 ultraBtn.Text = "Ultra Optimize"
-ultraBtn.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
-ultraBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ultraBtn.BackgroundColor3 = Color3.fromRGB(200,100,100)
+ultraBtn.TextColor3 = Color3.fromRGB(255,255,255)
 ultraBtn.TextSize = 14
 ultraBtn.Font = Enum.Font.GothamBold
 ultraBtn.Parent = tabs["Optifine"].Page
-Instance.new("UICorner", ultraBtn).CornerRadius = UDim.new(0, 6)
+Instance.new("UICorner", ultraBtn).CornerRadius = UDim.new(0,6)
 
-local teleportPage = tabs["Teleport"].Page
-local teleportList = Instance.new("Frame")
-teleportList.Size = UDim2.new(1, 0, 1, -40)
-teleportList.Position = UDim2.new(0, 0, 0, 35)
-teleportList.BackgroundTransparency = 1
-teleportList.Parent = teleportPage
+local nightBtn = Instance.new("TextButton")
+nightBtn.Size = UDim2.new(0.9, 0, 0, 25)
+nightBtn.Position = UDim2.new(0.05, 0, 0, 75)
+nightBtn.Text = "Night Vision: OFF"
+nightBtn.BackgroundColor3 = Color3.fromRGB(80,80,180)
+nightBtn.TextColor3 = Color3.fromRGB(255,255,255)
+nightBtn.TextSize = 14
+nightBtn.Font = Enum.Font.GothamBold
+nightBtn.Parent = tabs["Optifine"].Page
+Instance.new("UICorner", nightBtn).CornerRadius = UDim.new(0,6)
 
-local saveBtn = Instance.new("TextButton")
-saveBtn.Size = UDim2.new(0.9, 0, 0, 25)
-saveBtn.Position = UDim2.new(0.05, 0, 0, 5)
-saveBtn.Text = "Simpan Koordinat"
-saveBtn.BackgroundColor3 = Color3.fromRGB(100, 200, 100)
-saveBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-saveBtn.TextSize = 14
-saveBtn.Font = Enum.Font.GothamBold
-saveBtn.Parent = teleportPage
-Instance.new("UICorner", saveBtn).CornerRadius = UDim.new(0, 6)
+local tagBtn = Instance.new("TextButton")
+tagBtn.Size = UDim2.new(0.9, 0, 0, 25)
+tagBtn.Position = UDim2.new(0.05, 0, 0, 110)
+tagBtn.Text = "Hide NameTags: OFF"
+tagBtn.BackgroundColor3 = Color3.fromRGB(180,120,80)
+tagBtn.TextColor3 = Color3.fromRGB(255,255,255)
+tagBtn.TextSize = 14
+tagBtn.Font = Enum.Font.GothamBold
+tagBtn.Parent = tabs["Optifine"].Page
+Instance.new("UICorner", tagBtn).CornerRadius = UDim.new(0,6)
 
-local function refreshTeleportList()
-    for _,child in pairs(teleportList:GetChildren()) do
-        child:Destroy()
-    end
-    for i,coord in ipairs(savedCoords) do
-        local btn = Instance.new("TextButton")
-        btn.Size = UDim2.new(0.9, 0, 0, 25)
-        btn.Position = UDim2.new(0.05, 0, 0, (i-1)*30)
-        btn.Text = string.format("Teleport %d", i)
-        btn.BackgroundColor3 = Color3.fromRGB(100,100,250)
-        btn.TextColor3 = Color3.fromRGB(255,255,255)
-        btn.TextSize = 14
-        btn.Font = Enum.Font.GothamBold
-        btn.Parent = teleportList
-        Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
-        btn.MouseButton1Click:Connect(function()
-            local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-            if root then root.CFrame = CFrame.new(coord) end
-        end)
-    end
-end
+local hideBtn = Instance.new("TextButton")
+hideBtn.Size = UDim2.new(0.9, 0, 0, 25)
+hideBtn.Position = UDim2.new(0.05, 0, 0, 145)
+hideBtn.Text = "Hide Players: OFF"
+hideBtn.BackgroundColor3 = Color3.fromRGB(120,120,120)
+hideBtn.TextColor3 = Color3.fromRGB(255,255,255)
+hideBtn.TextSize = 14
+hideBtn.Font = Enum.Font.GothamBold
+hideBtn.Parent = tabs["Optifine"].Page
+Instance.new("UICorner", hideBtn).CornerRadius = UDim.new(0,6)
 
-saveBtn.MouseButton1Click:Connect(function()
-    local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-    if root then
-        table.insert(savedCoords, root.Position)
-        refreshTeleportList()
-    end
+local tpBox = Instance.new("TextBox")
+tpBox.Size = UDim2.new(0.9, 0, 0, 25)
+tpBox.Position = UDim2.new(0.05, 0, 0, 5)
+tpBox.PlaceholderText = "x, y, z"
+tpBox.BackgroundColor3 = Color3.fromRGB(50,50,50)
+tpBox.TextColor3 = Color3.fromRGB(255,255,255)
+tpBox.TextSize = 14
+tpBox.Font = Enum.Font.Gotham
+tpBox.Parent = tabs["Teleport"].Page
+Instance.new("UICorner", tpBox).CornerRadius = UDim.new(0,6)
+
+local tpBtn = Instance.new("TextButton")
+tpBtn.Size = UDim2.new(0.9, 0, 0, 25)
+tpBtn.Position = UDim2.new(0.05, 0, 0, 40)
+tpBtn.Text = "Teleport"
+tpBtn.BackgroundColor3 = Color3.fromRGB(100,100,200)
+tpBtn.TextColor3 = Color3.fromRGB(255,255,255)
+tpBtn.TextSize = 14
+tpBtn.Font = Enum.Font.GothamBold
+tpBtn.Parent = tabs["Teleport"].Page
+Instance.new("UICorner", tpBtn).CornerRadius = UDim.new(0,6)
+
+wsBtn.MouseButton1Click:Connect(function()
+    local v = tonumber(wsBox.Text)
+    if v then humanoid.WalkSpeed = v end
 end)
 
-local function setupCharacter(char)
-    humanoid = char:WaitForChild("Humanoid")
-    wsBox.Text = tostring(humanoid.WalkSpeed)
-    jpBox.Text = tostring(humanoid.JumpPower)
-    wsBtn.MouseButton1Click:Connect(function()
-        local val = tonumber(wsBox.Text)
-        if val then humanoid.WalkSpeed = val end
-    end)
-    jpBtn.MouseButton1Click:Connect(function()
-        local val = tonumber(jpBox.Text)
-        if val then humanoid.JumpPower = val end
-    end)
-    UserInputService.JumpRequest:Connect(function()
-        if unlimitedJump and humanoid then humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end
-    end)
-end
-
-setupCharacter(player.Character or player.CharacterAdded:Wait())
-player.CharacterAdded:Connect(setupCharacter)
+jpBtn.MouseButton1Click:Connect(function()
+    local v = tonumber(jpBox.Text)
+    if v then humanoid.JumpPower = v end
+end)
 
 ujBtn.MouseButton1Click:Connect(function()
     unlimitedJump = not unlimitedJump
     ujBtn.Text = "Unlimited Jump: " .. (unlimitedJump and "ON" or "OFF")
-    ujBtn.BackgroundColor3 = unlimitedJump and Color3.fromRGB(100, 200, 100) or Color3.fromRGB(200, 100, 100)
+    ujBtn.BackgroundColor3 = unlimitedJump and Color3.fromRGB(100,200,100) or Color3.fromRGB(200,100,100)
+end)
+
+UserInputService.JumpRequest:Connect(function()
+    if unlimitedJump and humanoid then
+        humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+    end
 end)
 
 RunService.RenderStepped:Connect(function()
@@ -286,69 +289,122 @@ RunService.RenderStepped:Connect(function()
     local now = tick()
     if now - lastTime >= 1 then
         fps = frameCount
-        frameCount = 0
-        lastTime = now
+        frameCount, lastTime = 0, now
         fpsLabel.Text = "FPS: " .. fps
     end
-    local root = character:FindFirstChild("HumanoidRootPart")
-    if root then
-        local pos = root.Position
-        coordLabel.Text = string.format("XYZ: %.1f, %.1f, %.1f", pos.X, pos.Y, pos.Z)
+    if character and character:FindFirstChild("HumanoidRootPart") then
+        local pos = character.HumanoidRootPart.Position
+        coordLabel.Text = string.format("XYZ: %.1f, %.1f, %.1f", pos.X,pos.Y,pos.Z)
     end
 end)
 
-local function optimizeGame()
-    if isOptimized then
-        for _, part in ipairs(optimizedParts) do
-            if part:IsA("BasePart") then part.Material = originalSettings[part] or part.Material end
-        end
-        Lighting.GlobalShadows = true
-        isOptimized = false
-        optimizeBtn.Text = "Optimize Mode"
-        optimizeBtn.BackgroundColor3 = Color3.fromRGB(100, 100, 250)
+local nv = nil
+nightBtn.MouseButton1Click:Connect(function()
+    if nv then
+        nv:Destroy()
+        nv = nil
+        nightBtn.Text = "Night Vision: OFF"
     else
-        optimizedParts = {}
-        for _, part in ipairs(Workspace:GetDescendants()) do
-            if part:IsA("BasePart") then
-                originalSettings[part] = part.Material
-                part.Material = Enum.Material.SmoothPlastic
-                table.insert(optimizedParts, part)
+        nv = Instance.new("ColorCorrectionEffect", Lighting)
+        nv.Brightness, nv.Contrast, nv.Saturation = 0.2, 0.3, 1
+        nv.TintColor = Color3.fromRGB(200,255,200)
+        nightBtn.Text = "Night Vision: ON"
+    end
+end)
+
+local tagHidden = false
+tagBtn.MouseButton1Click:Connect(function()
+    tagHidden = not tagHidden
+    for _,plr in pairs(Players:GetPlayers()) do
+        if plr.Character and plr.Character:FindFirstChild("Head") then
+            local nh = plr.Character.Head:FindFirstChild("Nametag") or plr.Character.Head:FindFirstChild("NameTag")
+            if nh and nh:IsA("BillboardGui") then nh.Enabled = not tagHidden end
+        end
+    end
+    tagBtn.Text = "Hide NameTags: " .. (tagHidden and "ON" or "OFF")
+end)
+
+local hiddenPlayers = false
+hideBtn.MouseButton1Click:Connect(function()
+    hiddenPlayers = not hiddenPlayers
+    for _,plr in pairs(Players:GetPlayers()) do
+        if plr ~= player and plr.Character then
+            for _,part in pairs(plr.Character:GetDescendants()) do
+                if part:IsA("BasePart") or part:IsA("Decal") then
+                    part.Transparency = hiddenPlayers and 1 or 0
+                end
             end
         end
-        Lighting.GlobalShadows = false
-        isOptimized = true
-        optimizeBtn.Text = "Restore Graphics"
-        optimizeBtn.BackgroundColor3 = Color3.fromRGB(100, 200, 100)
+    end
+    hideBtn.Text = "Hide Players: " .. (hiddenPlayers and "ON" or "OFF")
+end)
+
+local function optimizePerformance()
+    if isOptimized then return end
+    isOptimized = true
+    for _, obj in pairs(Workspace:GetDescendants()) do
+        if obj:IsA("BasePart") then
+            table.insert(optimizedParts,obj)
+            obj.Material = Enum.Material.SmoothPlastic
+            obj.Reflectance = 0
+        elseif obj:IsA("ParticleEmitter") or obj:IsA("Fire") or obj:IsA("Smoke") then
+            obj.Enabled = false
+        end
+    end
+    Lighting.GlobalShadows = false
+    Lighting.FogEnd = 1000000
+end
+
+local function ultraOptimize()
+    if isUltraMode then return end
+    isUltraMode = true
+    if not isOptimized then optimizePerformance() end
+    Lighting.GlobalShadows = false
+    Lighting.Technology = Enum.Technology.Legacy
+    Lighting.FogEnd, Lighting.FogStart = 1e6, 1e6
+    Lighting.Brightness = 5
+    Lighting.Ambient = Color3.fromRGB(178,178,178)
+    Lighting.OutdoorAmbient = Color3.fromRGB(178,178,178)
+    Lighting.ColorShift_Bottom = Color3.fromRGB(255,255,255)
+    Lighting.ColorShift_Top = Color3.fromRGB(255,255,255)
+    pcall(function()
+        settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+        settings().Rendering.MeshPartDetailLevel = Enum.MeshPartDetailLevel.Level01
+        settings().Rendering.GraphicsMode = Enum.GraphicsMode.Direct3D9
+    end)
+    for _,obj in pairs(Workspace:GetDescendants()) do
+        if obj:IsA("ParticleEmitter") or obj:IsA("Fire") or obj:IsA("Smoke") or obj:IsA("Sparkles") then
+            obj.Enabled = false
+        elseif obj:IsA("Atmosphere") then
+            obj.Density,obj.Offset,obj.Glare,obj.Haze=0,0,0,0
+        elseif obj:IsA("Clouds") then
+            obj.Enabled=false obj.Density=0
+        elseif obj:IsA("BloomEffect") or obj:IsA("BlurEffect") or obj:IsA("ColorCorrectionEffect") then
+            obj.Enabled=false
+        elseif obj:IsA("Sound") and obj.IsPlaying then
+            obj.Volume=obj.Volume*0.5
+        end
     end
 end
 
-optimizeBtn.MouseButton1Click:Connect(optimizeGame)
+optBtn.MouseButton1Click:Connect(optimizePerformance)
+ultraBtn.MouseButton1Click:Connect(ultraOptimize)
 
-ultraBtn.MouseButton1Click:Connect(function()
-    if isUltraMode then
-        Lighting.GlobalShadows = true
-        Lighting.Brightness = 2
-        for _, v in pairs(Workspace:GetDescendants()) do
-            if v:IsA("BasePart") then v.Material = originalSettings[v] or v.Material end
+tpBtn.MouseButton1Click:Connect(function()
+    if character and character:FindFirstChild("HumanoidRootPart") then
+        local coords = {}
+        for c in string.gmatch(tpBox.Text,"[^,]+") do
+            table.insert(coords,tonumber(c))
         end
-        isUltraMode = false
-        ultraBtn.Text = "Ultra Optimize"
-        ultraBtn.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
-    else
-        for _, v in pairs(Workspace:GetDescendants()) do
-            if v:IsA("BasePart") then v.Material = Enum.Material.SmoothPlastic end
+        if #coords==3 then
+            character.HumanoidRootPart.CFrame = CFrame.new(coords[1],coords[2]+10,coords[3])
         end
-        Lighting.GlobalShadows = false
-        Lighting.Brightness = 5
-        isUltraMode = true
-        ultraBtn.Text = "Restore Ultra"
-        ultraBtn.BackgroundColor3 = Color3.fromRGB(100, 200, 100)
     end
 end)
 
 minimizeBtn.MouseButton1Click:Connect(function()
     isMinimized = not isMinimized
     contentFrame.Visible = not isMinimized
-    minimizeBtn.Text = isMinimized and "+" or "−"
-    mainFrame.Size = isMinimized and UDim2.new(0, 350, 0, 30) or UDim2.new(0, 350, 0, 320)
+    tabFrame.Visible = not isMinimized
+    mainFrame.Size = isMinimized and UDim2.new(0,350,0,40) or UDim2.new(0,350,0,320)
 end)
