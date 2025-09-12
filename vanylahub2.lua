@@ -8,6 +8,12 @@ local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoid = character:WaitForChild("Humanoid")
 
+-- update humanoid kalau respawn
+player.CharacterAdded:Connect(function(char)
+    character = char
+    humanoid = char:WaitForChild("Humanoid")
+end)
+
 local unlimitedJump = false
 local isOptimized = false
 local isUltraMode = false
@@ -264,12 +270,16 @@ Instance.new("UICorner", tpBtn).CornerRadius = UDim.new(0,6)
 
 wsBtn.MouseButton1Click:Connect(function()
     local v = tonumber(wsBox.Text)
-    if v then humanoid.WalkSpeed = v end
+    if v and humanoid and humanoid.Parent then
+        humanoid.WalkSpeed = v
+    end
 end)
 
 jpBtn.MouseButton1Click:Connect(function()
     local v = tonumber(jpBox.Text)
-    if v then humanoid.JumpPower = v end
+    if v and humanoid and humanoid.Parent then
+        humanoid.JumpPower = v
+    end
 end)
 
 ujBtn.MouseButton1Click:Connect(function()
@@ -279,7 +289,7 @@ ujBtn.MouseButton1Click:Connect(function()
 end)
 
 UserInputService.JumpRequest:Connect(function()
-    if unlimitedJump and humanoid then
+    if unlimitedJump and humanoid and humanoid.Parent then
         humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
     end
 end)
