@@ -267,10 +267,31 @@ local function setupCharacter(char)
         local val = tonumber(jpBox.Text)
         if val then humanoid.JumpPower = val end
     end)
-    UserInputService.JumpRequest:Connect(function()
-        if unlimitedJump and humanoid then humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end
-    end)
-end
+    local isHoldingJump = false
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if input.KeyCode == Enum.KeyCode.Space then
+        isHoldingJump = true
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input, gameProcessed)
+    if input.KeyCode == Enum.KeyCode.Space then
+        isHoldingJump = false
+    end
+end)
+
+UserInputService.JumpRequest:Connect(function()
+    if humanoid and unlimitedJump then
+        if not isHoldingJump then
+            humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        else
+            if humanoid.FloorMaterial ~= Enum.Material.Air then
+                humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+            end
+        end
+    end
+end)
 
 setupCharacter(player.Character or player.CharacterAdded:Wait())
 player.CharacterAdded:Connect(setupCharacter)
