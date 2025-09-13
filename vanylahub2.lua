@@ -378,32 +378,29 @@ end
 
 local function ultraBoost(enable)
     if enable then
-        for _, plr in pairs(Players:GetPlayers()) do
-            if plr ~= player and plr.Character then
-                for _, part in pairs(plr.Character:GetDescendants()) do
-                    if part:IsA("BasePart") then
-                        part.Transparency = 1
-                    elseif part:IsA("Decal") or part:IsA("Texture") then
-                        part.Transparency = 1
+        for _, obj in pairs(Workspace:GetDescendants()) do
+            local isLocalChar = (player.Character and obj:IsDescendantOf(player.Character))
+            if not isLocalChar then
+                if obj:IsA("BasePart") or obj:IsA("MeshPart") then
+                    obj.Material = Enum.Material.SmoothPlastic
+                    obj.Reflectance = 0
+                    obj.Transparency = 0
+                    obj.Color = Color3.fromRGB(math.random(100,180), math.random(100,180), math.random(100,180))
+                    if obj:IsA("MeshPart") then
+                        obj.TextureID = ""
                     end
+                elseif obj:IsA("Decal") or obj:IsA("Texture") then
+                    obj:Destroy()
+                elseif obj:IsA("ParticleEmitter") or obj:IsA("Fire") or obj:IsA("Smoke") or obj:IsA("Sparkles") then
+                    obj.Enabled = false
                 end
             end
         end
         Lighting.GlobalShadows = false
-        Lighting.FogEnd = 50
+        Lighting.FogEnd = 75
         isUltraMode = true
     else
-        for _, plr in pairs(Players:GetPlayers()) do
-            if plr ~= player and plr.Character then
-                for _, part in pairs(plr.Character:GetDescendants()) do
-                    if part:IsA("BasePart") then
-                        part.Transparency = 0
-                    elseif part:IsA("Decal") or part:IsA("Texture") then
-                        part.Transparency = 0
-                    end
-                end
-            end
-        end
+        -- Reset dasar (ga balikin semua detail, cuma normal playable)
         Lighting.GlobalShadows = true
         Lighting.FogEnd = 100000
         isUltraMode = false
