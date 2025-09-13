@@ -379,8 +379,8 @@ end
 local function ultraBoost(enable)
     if enable then
         for _, obj in pairs(Workspace:GetDescendants()) do
-            local isLocalChar = (player.Character and obj:IsDescendantOf(player.Character))
-            if not isLocalChar then
+            -- cek apakah object itu bagian dari character local player
+            if not (player.Character and obj:IsDescendantOf(player.Character)) then
                 if obj:IsA("BasePart") or obj:IsA("MeshPart") then
                     obj.Material = Enum.Material.SmoothPlastic
                     obj.Reflectance = 0
@@ -400,7 +400,6 @@ local function ultraBoost(enable)
         Lighting.FogEnd = 75
         isUltraMode = true
     else
-        -- Reset dasar (ga balikin semua detail, cuma normal playable)
         Lighting.GlobalShadows = true
         Lighting.FogEnd = 100000
         isUltraMode = false
