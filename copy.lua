@@ -98,8 +98,15 @@ local function copyAnimationsFrom(targetUsername)
     local myAnimate = myChar:FindFirstChild("Animate")
     if targetAnimate and myAnimate then
         for _, anim in pairs(myAnimate:GetChildren()) do
-            if anim:IsA("StringValue") and targetAnimate:FindFirstChild(anim.Name) then
-                anim.Value = targetAnimate[anim.Name].Value
+            local targetAnim = targetAnimate:FindFirstChild(anim.Name)
+            if targetAnim then
+                if anim:IsA("StringValue") and targetAnim:IsA("StringValue") then
+                    anim.Value = targetAnim.Value
+                elseif anim:IsA("Animation") and targetAnim:IsA("Animation") then
+                    anim.AnimationId = targetAnim.AnimationId
+                elseif anim:IsA("StringValue") and targetAnim:IsA("Animation") then
+                    anim.Value = targetAnim.AnimationId
+                end
             end
         end
     end
