@@ -2,112 +2,98 @@ local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "CopyAnim"
+screenGui.Name = "CopyAvatar"
 screenGui.Parent = player:WaitForChild("PlayerGui")
 screenGui.ResetOnSpawn = false
 
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 200, 0, 90)
-mainFrame.Position = UDim2.new(0.78, 0, 0.2, 0)
+mainFrame.Size = UDim2.new(0, 220, 0, 110)
+mainFrame.Position = UDim2.new(0.35, 0, 0.3, 0)
 mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
 mainFrame.Active = true
 mainFrame.Draggable = true
 mainFrame.Parent = screenGui
 Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 10)
 
+-- title bar
+local titleBar = Instance.new("Frame")
+titleBar.Size = UDim2.new(1, 0, 0, 28)
+titleBar.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+titleBar.Parent = mainFrame
+
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, -36, 0, 28)
-title.Position = UDim2.new(0, 0, 0, 0)
-title.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
-title.Text = "Copy Animation"
+title.Size = UDim2.new(1, -32, 1, 0)
+title.Position = UDim2.new(0, 6, 0, 0)
+title.BackgroundTransparency = 1
+title.Text = "Copy Avatar"
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.Font = Enum.Font.GothamBold
 title.TextSize = 14
 title.TextXAlignment = Enum.TextXAlignment.Left
-title.Parent = mainFrame
-title.Padding = nil
+title.Parent = titleBar
 
 local minimizeBtn = Instance.new("TextButton")
-minimizeBtn.Size = UDim2.new(0, 28, 0, 28)
-minimizeBtn.Position = UDim2.new(1, -36, 0, 0)
+minimizeBtn.Size = UDim2.new(0, 28, 1, 0)
+minimizeBtn.Position = UDim2.new(1, -30, 0, 0)
 minimizeBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
-minimizeBtn.Text = "_"
+minimizeBtn.Text = "-"
 minimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 minimizeBtn.Font = Enum.Font.GothamBold
-minimizeBtn.TextSize = 18
-minimizeBtn.Parent = mainFrame
+minimizeBtn.TextSize = 16
+minimizeBtn.Parent = titleBar
 Instance.new("UICorner", minimizeBtn).CornerRadius = UDim.new(0, 6)
 
-local closeBtn = Instance.new("TextButton")
-closeBtn.Size = UDim2.new(0, 28, 0, 28)
-closeBtn.Position = UDim2.new(1, -6, 0, 0)
-closeBtn.BackgroundColor3 = Color3.fromRGB(200, 80, 80)
-closeBtn.Text = "X"
-closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-closeBtn.Font = Enum.Font.GothamBold
-closeBtn.TextSize = 14
-closeBtn.Parent = mainFrame
-Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 6)
+-- content holder
+local content = Instance.new("Frame")
+content.Size = UDim2.new(1, -12, 0, 72)
+content.Position = UDim2.new(0, 6, 0, 34)
+content.BackgroundTransparency = 1
+content.Parent = mainFrame
 
-local contentHolder = Instance.new("Frame")
-contentHolder.Size = UDim2.new(1, 0, 0, 62)
-contentHolder.Position = UDim2.new(0, 0, 0, 28)
-contentHolder.BackgroundTransparency = 1
-contentHolder.Parent = mainFrame
+local userBox = Instance.new("TextBox")
+userBox.Size = UDim2.new(1, 0, 0, 30)
+userBox.Position = UDim2.new(0, 0, 0, 0)
+userBox.BackgroundColor3 = Color3.fromRGB(45, 45, 60)
+userBox.PlaceholderText = "Masukkan username"
+userBox.Text = ""
+userBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+userBox.Font = Enum.Font.Gotham
+userBox.TextSize = 12
+userBox.Parent = content
+Instance.new("UICorner", userBox).CornerRadius = UDim.new(0, 8)
 
-local copyBtn = Instance.new("TextButton")
-copyBtn.Size = UDim2.new(0.9, 0, 0, 40)
-copyBtn.Position = UDim2.new(0.05, 0, 0, 12)
-copyBtn.BackgroundColor3 = Color3.fromRGB(70, 140, 240)
-copyBtn.Text = "Ambil Animasi reyyxvnnn"
-copyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-copyBtn.Font = Enum.Font.GothamBold
-copyBtn.TextSize = 12
-copyBtn.Parent = contentHolder
-Instance.new("UICorner", copyBtn).CornerRadius = UDim.new(0, 8)
+local applyBtn = Instance.new("TextButton")
+applyBtn.Size = UDim2.new(1, 0, 0, 30)
+applyBtn.Position = UDim2.new(0, 0, 0, 38)
+applyBtn.BackgroundColor3 = Color3.fromRGB(70, 140, 240)
+applyBtn.Text = "Apply"
+applyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+applyBtn.Font = Enum.Font.GothamBold
+applyBtn.TextSize = 12
+applyBtn.Parent = content
+Instance.new("UICorner", applyBtn).CornerRadius = UDim.new(0, 8)
 
+-- minimize toggle
 local isMinimized = false
 local originalSize = mainFrame.Size
-
 minimizeBtn.MouseButton1Click:Connect(function()
-    if not isMinimized then
-        contentHolder.Visible = false
-        mainFrame.Size = UDim2.new(mainFrame.Size.X.Scale, mainFrame.Size.X.Offset, 0, 28)
-        minimizeBtn.Text = "▢"
-        isMinimized = true
-    else
-        contentHolder.Visible = true
+    if isMinimized then
+        content.Visible = true
         mainFrame.Size = originalSize
-        minimizeBtn.Text = "_"
-        isMinimized = false
+        minimizeBtn.Text = "-"
+    else
+        content.Visible = false
+        mainFrame.Size = UDim2.new(originalSize.X.Scale, originalSize.X.Offset, 0, 28)
+        minimizeBtn.Text = "+"
     end
+    isMinimized = not isMinimized
 end)
 
-closeBtn.MouseButton1Click:Connect(function()
-    screenGui:Destroy()
-end)
-
+-- fungsi copy animasi
 local function copyAnimationsFrom(targetUsername)
     local targetPlayer = Players:FindFirstChild(targetUsername)
-    if not targetPlayer then
-        for _, pl in pairs(Players:GetPlayers()) do
-            if pl.Name:lower() == targetUsername:lower() then
-                targetPlayer = pl
-                break
-            end
-        end
-    end
-    if not targetPlayer then return end
-    local targetChar = targetPlayer.Character
-    if not targetChar then
-        local con
-        con = targetPlayer.CharacterAdded:Connect(function()
-            con:Disconnect()
-            copyAnimationsFrom(targetUsername)
-        end)
-        return
-    end
-    local targetAnimate = targetChar:FindFirstChild("Animate")
+    if not targetPlayer or not targetPlayer.Character then return end
+    local targetAnimate = targetPlayer.Character:FindFirstChild("Animate")
     local myChar = player.Character or player.CharacterAdded:Wait()
     local myAnimate = myChar:FindFirstChild("Animate")
     if targetAnimate and myAnimate then
@@ -119,6 +105,10 @@ local function copyAnimationsFrom(targetUsername)
     end
 end
 
-copyBtn.MouseButton1Click:Connect(function()
-    copyAnimationsFrom("reyyxvnnn")
+-- apply button
+applyBtn.MouseButton1Click:Connect(function()
+    local name = userBox.Text
+    if name and name ~= "" then
+        copyAnimationsFrom(name)
+    end
 end)
