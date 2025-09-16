@@ -17,7 +17,6 @@ local unlimitedJump = false
 local isOptimized, isUltraMode = false, false
 local optimizedParts = {}
 
--- Orion Library
 local OrionLib = loadstring(game:HttpGet('https://raw.githubusercontent.com/jensonhirst/Orion/main/source'))()
 
 local Window = OrionLib:MakeWindow({
@@ -27,9 +26,9 @@ local Window = OrionLib:MakeWindow({
     ConfigFolder = "VanylaHub"
 })
 
--- Tab Player
 local TabPlayer = Window:MakeTab({Name="Player", Icon="rbxassetid://4483345998"})
-local wsBox, jpBox
+local fpsLabel = TabPlayer:AddLabel("FPS: 0")
+local coordLabel = TabPlayer:AddLabel("XYZ: 0,0,0")
 
 TabPlayer:AddTextbox({
     Name = "WalkSpeed",
@@ -59,10 +58,6 @@ TabPlayer:AddToggle({
     end
 })
 
-TabPlayer:AddLabel("FPS: 0")
-local fpsLabel = TabPlayer:AddLabel("XYZ: 0,0,0")
-
--- Tab Optifine
 local TabOpti = Window:MakeTab({Name="Optifine", Icon="rbxassetid://4483345998"})
 
 TabOpti:AddButton({
@@ -118,7 +113,6 @@ TabOpti:AddToggle({
     end
 })
 
--- Tab Teleport
 local TabTP = Window:MakeTab({Name="Teleport", Icon="rbxassetid://4483345998"})
 
 TabTP:AddTextbox({
@@ -136,23 +130,21 @@ TabTP:AddTextbox({
     end
 })
 
--- FPS Counter + Coordinates Update
-local fps, frameCount, lastTime = 0,0,tick()
+local fps, frameCount, lastTime = 0, 0, tick()
 RunService.RenderStepped:Connect(function()
     frameCount += 1
     local now = tick()
     if now - lastTime >= 1 then
         fps = frameCount
         frameCount, lastTime = 0, now
-        TabPlayer:AddLabel("FPS: "..fps) -- refresh fps
+        fpsLabel:Set("FPS: "..fps)
     end
     if character and character:FindFirstChild("HumanoidRootPart") then
         local pos = character.HumanoidRootPart.Position
-        fpsLabel:Set(string.format("XYZ: %.1f, %.1f, %.1f", pos.X,pos.Y,pos.Z))
+        coordLabel:Set(string.format("XYZ: %.1f, %.1f, %.1f", pos.X, pos.Y, pos.Z))
     end
 end)
 
--- Unlimited Jump
 UserInputService.JumpRequest:Connect(function()
     if unlimitedJump and humanoid and humanoid.Parent then
         humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
