@@ -1,122 +1,177 @@
-local SimpleUILib = {}
+-- GUI Script (Roblox Lua)
 
-local function makeDraggable(gui)
-	local dragging, dragInput, dragStart, startPos
-	local function update(input)
-		local delta = input.Position - dragStart
-		gui.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-	end
-	gui.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-			dragging = true
-			dragStart = input.Position
-			startPos = gui.Position
-			input.Changed:Connect(function()
-				if input.UserInputState == Enum.UserInputState.End then
-					dragging = false
-				end
-			end)
-		end
-	end)
-	gui.InputChanged:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-			dragInput = input
-		end
-	end)
-	game:GetService("UserInputService").InputChanged:Connect(function(input)
-		if input == dragInput and dragging then
-			update(input)
-		end
-	end)
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local UIS = game:GetService("UserInputService")
+
+-- Buat ScreenGui
+local screenGui = Instance.new("ScreenGui", LocalPlayer.PlayerGui)
+screenGui.Name = "CustomMenu"
+
+-- Buat Frame Utama
+local mainFrame = Instance.new("Frame", screenGui)
+mainFrame.Size = UDim2.new(0, 300, 0, 400)
+mainFrame.Position = UDim2.new(0.3, 0, 0.2, 0)
+mainFrame.BackgroundColor3 = Color3.fromRGB(30,30,30)
+
+-- Tab Button
+local tabs = {"Player", "Optifine", "Teleport"}
+local tabFrames = {}
+
+for i, name in ipairs(tabs) do
+    local button = Instance.new("TextButton", mainFrame)
+    button.Size = UDim2.new(0, 100, 0, 30)
+    button.Position = UDim2.new(0, (i-1)*100, 0, 0)
+    button.Text = name
+
+    local contentFrame = Instance.new("Frame", mainFrame)
+    contentFrame.Size = UDim2.new(1, 0, 1, -30)
+    contentFrame.Position = UDim2.new(0, 0, 0, 30)
+    contentFrame.BackgroundColor3 = Color3.fromRGB(50,50,50)
+    contentFrame.Visible = (i == 1) -- default Player tab aktif
+
+    tabFrames[name] = contentFrame
+
+    button.MouseButton1Click:Connect(function()
+        for _, f in pairs(tabFrames) do
+            f.Visible = false
+        end
+        contentFrame.Visible = true
+    end)
 end
 
-function SimpleUILib.CreateWindow(opts)
-	opts = opts or {}
-	local title = opts.Title or "Window"
+-- =========================
+-- PLAYER MENU
+-- =========================
+local playerFrame = tabFrames["Player"]
+local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local humanoid = char:WaitForChild("Humanoid")
 
-	local screenGui = Instance.new("ScreenGui")
-	screenGui.Name = "SimpleUILibGui"
-	screenGui.ResetOnSpawn = false
+-- WalkSpeed
+local wsLabel = Instance.new("TextLabel", playerFrame)
+wsLabel.Size = UDim2.new(0, 200, 0, 30)
+wsLabel.Position = UDim2.new(0, 10, 0, 10)
+wsLabel.Text = "WalkSpeed: " .. humanoid.WalkSpeed
 
-	local window = Instance.new("Frame")
-	window.Name = "Window"
-	window.Size = UDim2.new(0, 400, 0, 260)
-	window.Position = UDim2.new(0.3, 0, 0.25, 0)
-	window.AnchorPoint = Vector2.new(0,0)
-	window.BackgroundColor3 = Color3.fromRGB(30,30,30)
-	window.BorderSizePixel = 0
-	window.Parent = screenGui
+local wsPlus = Instance.new("TextButton", playerFrame)
+wsPlus.Size = UDim2.new(0, 30, 0, 30)
+wsPlus.Position = UDim2.new(0, 220, 0, 10)
+wsPlus.Text = "+"
 
-	local titleBar = Instance.new("Frame")
-	titleBar.Name = "TitleBar"
-	titleBar.Size = UDim2.new(1, 0, 0, 28)
-	titleBar.BackgroundColor3 = Color3.fromRGB(20,20,20)
-	titleBar.BorderSizePixel = 0
-	titleBar.Parent = window
+local wsMinus = Instance.new("TextButton", playerFrame)
+wsMinus.Size = UDim2.new(0, 30, 0, 30)
+wsMinus.Position = UDim2.new(0, 260, 0, 10)
+wsMinus.Text = "-"
 
-	local titleLabel = Instance.new("TextLabel")
-	titleLabel.Name = "Title"
-	titleLabel.Size = UDim2.new(1, -60, 1, 0)
-	titleLabel.Position = UDim2.new(0, 8, 0, 0)
-	titleLabel.BackgroundTransparency = 1
-	titleLabel.Text = title
-	titleLabel.TextXAlignment = Enum.TextXAlignment.Left
-	titleLabel.TextYAlignment = Enum.TextYAlignment.Center
-	titleLabel.Font = Enum.Font.Gotham
-	titleLabel.TextSize = 14
-	titleLabel.TextColor3 = Color3.fromRGB(235,235,235)
-	titleLabel.Parent = titleBar
+wsPlus.MouseButton1Click:Connect(function()
+    humanoid.WalkSpeed = humanoid.WalkSpeed + 2
+    wsLabel.Text = "WalkSpeed: " .. humanoid.WalkSpeed
+end)
 
-	local btnMin = Instance.new("TextButton")
-	btnMin.Name = "Minimize"
-	btnMin.Size = UDim2.new(0, 44, 1, 0)
-	btnMin.Position = UDim2.new(1, -48, 0, 0)
-	btnMin.AnchorPoint = Vector2.new(0,0)
-	btnMin.BackgroundTransparency = 0
-	btnMin.BackgroundColor3 = Color3.fromRGB(40,40,40)
-	btnMin.BorderSizePixel = 0
-	btnMin.Text = "-"
-	btnMin.Font = Enum.Font.Gotham
-	btnMin.TextSize = 18
-	btnMin.TextColor3 = Color3.fromRGB(235,235,235)
-	btnMin.Parent = titleBar
+wsMinus.MouseButton1Click:Connect(function()
+    humanoid.WalkSpeed = humanoid.WalkSpeed - 2
+    wsLabel.Text = "WalkSpeed: " .. humanoid.WalkSpeed
+end)
 
-	local content = Instance.new("Frame")
-	content.Name = "Content"
-	content.Size = UDim2.new(1, 0, 1, -28)
-	content.Position = UDim2.new(0, 0, 0, 28)
-	content.BackgroundColor3 = Color3.fromRGB(28,28,28)
-	content.BorderSizePixel = 0
-	content.Parent = window
+-- JumpPower
+local jpLabel = Instance.new("TextLabel", playerFrame)
+jpLabel.Size = UDim2.new(0, 200, 0, 30)
+jpLabel.Position = UDim2.new(0, 10, 0, 50)
+jpLabel.Text = "JumpPower: " .. humanoid.JumpPower
 
-	local uiList = Instance.new("UIListLayout")
-	uiList.Padding = UDim.new(0, 6)
-	uiList.SortOrder = Enum.SortOrder.LayoutOrder
-	uiList.Parent = content
+local jpPlus = Instance.new("TextButton", playerFrame)
+jpPlus.Size = UDim2.new(0, 30, 0, 30)
+jpPlus.Position = UDim2.new(0, 220, 0, 50)
+jpPlus.Text = "+"
 
-	local minimized = false
-	btnMin.MouseButton1Click:Connect(function()
-		minimized = not minimized
-		if minimized then
-			content.Visible = false
-			window.Size = UDim2.new(0, 200, 0, 28)
-		else
-			content.Visible = true
-			window.Size = UDim2.new(0, 400, 0, 260)
-		end
-	end)
+local jpMinus = Instance.new("TextButton", playerFrame)
+jpMinus.Size = UDim2.new(0, 30, 0, 30)
+jpMinus.Position = UDim2.new(0, 260, 0, 50)
+jpMinus.Text = "-"
 
-	makeDraggable(titleBar)
+jpPlus.MouseButton1Click:Connect(function()
+    humanoid.JumpPower = humanoid.JumpPower + 5
+    jpLabel.Text = "JumpPower: " .. humanoid.JumpPower
+end)
 
-	screenGui.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+jpMinus.MouseButton1Click:Connect(function()
+    humanoid.JumpPower = humanoid.JumpPower - 5
+    jpLabel.Text = "JumpPower: " .. humanoid.JumpPower
+end)
 
-	local api = {}
-	api.Root = window
-	api.Content = content
-	api.ScreenGui = screenGui
-	api.SetTitle = function(text) titleLabel.Text = text end
-	api.Destroy = function() screenGui:Destroy() end
-	return api
-end
+-- Unlimited Jump
+local unlimitedJump = false
+local ujButton = Instance.new("TextButton", playerFrame)
+ujButton.Size = UDim2.new(0, 200, 0, 30)
+ujButton.Position = UDim2.new(0, 10, 0, 90)
+ujButton.Text = "Unlimited Jump: OFF"
 
-return SimpleUILib
+ujButton.MouseButton1Click:Connect(function()
+    unlimitedJump = not unlimitedJump
+    ujButton.Text = "Unlimited Jump: " .. (unlimitedJump and "ON" or "OFF")
+end)
+
+UIS.JumpRequest:Connect(function()
+    if unlimitedJump and humanoid then
+        humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+    end
+end)
+
+-- =========================
+-- OPTIFINE MENU (kosong)
+-- =========================
+local optifineFrame = tabFrames["Optifine"]
+local label = Instance.new("TextLabel", optifineFrame)
+label.Size = UDim2.new(1, 0, 0, 30)
+label.Text = "Belum ada fitur Optifine"
+
+-- =========================
+-- TELEPORT MENU
+-- =========================
+local teleportFrame = tabFrames["Teleport"]
+
+-- Teleport ke Player
+local inputUser = Instance.new("TextBox", teleportFrame)
+inputUser.Size = UDim2.new(0, 200, 0, 30)
+inputUser.Position = UDim2.new(0, 10, 0, 10)
+inputUser.PlaceholderText = "Masukkan Username"
+
+local tpButton = Instance.new("TextButton", teleportFrame)
+tpButton.Size = UDim2.new(0, 80, 0, 30)
+tpButton.Position = UDim2.new(0, 220, 0, 10)
+tpButton.Text = "Teleport"
+
+tpButton.MouseButton1Click:Connect(function()
+    local target = Players:FindFirstChild(inputUser.Text)
+    if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+        char:MoveTo(target.Character.HumanoidRootPart.Position)
+    end
+end)
+
+-- Save & Teleport ke Koordinat
+local savedPos
+
+local saveBtn = Instance.new("TextButton", teleportFrame)
+saveBtn.Size = UDim2.new(0, 140, 0, 30)
+saveBtn.Position = UDim2.new(0, 10, 0, 50)
+saveBtn.Text = "Save Koordinat"
+
+local tpCoordBtn = Instance.new("TextButton", teleportFrame)
+tpCoordBtn.Size = UDim2.new(0, 140, 0, 30)
+tpCoordBtn.Position = UDim2.new(0, 160, 0, 50)
+tpCoordBtn.Text = "Teleport Koordinat"
+
+saveBtn.MouseButton1Click:Connect(function()
+    if char and char:FindFirstChild("HumanoidRootPart") then
+        savedPos = char.HumanoidRootPart.Position
+        saveBtn.Text = "Saved!"
+        task.wait(1)
+        saveBtn.Text = "Save Koordinat"
+    end
+end)
+
+tpCoordBtn.MouseButton1Click:Connect(function()
+    if savedPos then
+        char:MoveTo(savedPos)
+    end
+end)
