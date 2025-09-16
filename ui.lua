@@ -1,4 +1,4 @@
--- VANYLA HUB
+-- 💫 VANYLA HUB (Rounded UI)
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local UIS = game:GetService("UserInputService")
@@ -19,6 +19,11 @@ MainFrame.Active = true
 MainFrame.Draggable = true
 MainFrame.Parent = ScreenGui
 
+-- Round Frame
+local UICornerMain = Instance.new("UICorner")
+UICornerMain.CornerRadius = UDim.new(0, 10)
+UICornerMain.Parent = MainFrame
+
 -- Judul
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, -30, 0, 30)
@@ -33,14 +38,16 @@ Title.Parent = MainFrame
 
 -- Tombol Minimize
 local Minimize = Instance.new("TextButton")
-Minimize.Size = UDim2.new(0, 30, 0, 30)
-Minimize.Position = UDim2.new(1, -30, 0, 0)
+Minimize.Size = UDim2.new(0, 30, 0, 25)
+Minimize.Position = UDim2.new(1, -35, 0, 3)
 Minimize.Text = "-"
 Minimize.TextSize = 18
 Minimize.Font = Enum.Font.GothamBold
 Minimize.TextColor3 = Color3.fromRGB(255, 255, 255)
 Minimize.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 Minimize.Parent = MainFrame
+local UICornerMin = Instance.new("UICorner", Minimize)
+UICornerMin.CornerRadius = UDim.new(0, 6)
 
 -- Konten Frame
 local Content = Instance.new("Frame")
@@ -67,6 +74,8 @@ local function createTab(name, order)
     button.TextColor3 = Color3.fromRGB(255, 255, 255)
     button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     button.Parent = TabHolder
+    local UICorner = Instance.new("UICorner", button)
+    UICorner.CornerRadius = UDim.new(0, 6)
     return button
 end
 
@@ -145,6 +154,7 @@ plusWalk.TextSize = 18
 plusWalk.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
 plusWalk.TextColor3 = Color3.fromRGB(255, 255, 255)
 plusWalk.Parent = playerPage
+Instance.new("UICorner", plusWalk).CornerRadius = UDim.new(0, 6)
 
 local minusWalk = plusWalk:Clone()
 minusWalk.Text = "-"
@@ -169,7 +179,7 @@ end)
 
 -- Unlimited Jump
 local jumpToggle = Instance.new("TextButton")
-jumpToggle.Size = UDim2.new(0, 120, 0, 25)
+jumpToggle.Size = UDim2.new(0, 180, 0, 25)
 jumpToggle.Position = UDim2.new(0, 10, 0, 50)
 jumpToggle.Text = "Unlimited Jump: OFF"
 jumpToggle.Font = Enum.Font.GothamBold
@@ -177,6 +187,7 @@ jumpToggle.TextSize = 14
 jumpToggle.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
 jumpToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
 jumpToggle.Parent = playerPage
+Instance.new("UICorner", jumpToggle).CornerRadius = UDim.new(0, 6)
 
 local unlimitedJump = false
 jumpToggle.MouseButton1Click:Connect(function()
@@ -201,6 +212,7 @@ tpBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 tpBox.Font = Enum.Font.Gotham
 tpBox.TextSize = 14
 tpBox.Parent = teleportPage
+Instance.new("UICorner", tpBox).CornerRadius = UDim.new(0, 6)
 
 local tpButton = Instance.new("TextButton")
 tpButton.Size = UDim2.new(0, 80, 0, 25)
@@ -211,6 +223,7 @@ tpButton.TextSize = 14
 tpButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
 tpButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 tpButton.Parent = teleportPage
+Instance.new("UICorner", tpButton).CornerRadius = UDim.new(0, 6)
 
 tpButton.MouseButton1Click:Connect(function()
     local target = Players:FindFirstChild(tpBox.Text)
@@ -231,9 +244,11 @@ saveBtn.TextSize = 14
 saveBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
 saveBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 saveBtn.Parent = teleportPage
+Instance.new("UICorner", saveBtn).CornerRadius = UDim.new(0, 6)
 
 local tpSavedBtn = saveBtn:Clone()
 tpSavedBtn.Text = "Teleport Koordinat"
+tpSavedBtn.Size = UDim2.new(0, 150, 0, 25)
 tpSavedBtn.Position = UDim2.new(0, 150, 0, 50)
 tpSavedBtn.Parent = teleportPage
 
