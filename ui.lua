@@ -1,154 +1,182 @@
+-- load Orion
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/jensonhirst/Orion/main/source')))()
 
-local Window = OrionLib:MakeWindow({
-    Name = "💫 VANYLA HUB",
-    HidePremium = false,
-    SaveConfig = false,
-    IntroEnabled = true,
-    IntroText = "💫 VANYLA HUB"
-})
-
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Lighting = game:GetService("Lighting")
+local Workspace = game:GetService("Workspace")
+local UserInputService = game:GetService("UserInputService")
+
 local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
 
-local humanoid
-local function getHumanoid()
-    if player.Character then
-        humanoid = player.Character:FindFirstChildOfClass("Humanoid")
-        if humanoid then
-            humanoid.UseJumpPower = true
-        end
-    end
-end
-
--- ambil humanoid awal
-getHumanoid()
--- update humanoid kalau respawn
-player.CharacterAdded:Connect(function()
-    player.Character:WaitForChild("Humanoid")
-    getHumanoid()
+-- respawn handler
+player.CharacterAdded:Connect(function(char)
+    character = char
+    humanoid = char:WaitForChild("Humanoid")
 end)
 
--- variabel teleport
-local savedPosition = nil
+-- variabel fitur
+local unlimitedJump = false
+local isOptimized = false
+local isUltraMode = false
+local fps, lastTime, frameCount = 0, tick(), 0
 
--- TAB PLAYER
+-- Orion window
+local Window = OrionLib:MakeWindow({
+    Name = "Vanyla Hub",
+    HidePremium = false,
+    SaveConfig = false
+})
+
+-- === Player Tab ===
 local PlayerTab = Window:MakeTab({
     Name = "Player",
     Icon = "rbxassetid://4483345998",
     PremiumOnly = false
 })
 
--- WalkSpeed Slider
-PlayerTab:AddSlider({
+PlayerTab:AddTextbox({
     Name = "WalkSpeed",
-    Min = 0,
-    Max = 200,
-    Default = humanoid and humanoid.WalkSpeed or 16,
-    Increment = 1,
-    ValueName = "speed",
+    Default = tostring(humanoid.WalkSpeed),
+    TextDisappear = true,
     Callback = function(Value)
-        if humanoid then
-            humanoid.WalkSpeed = Value
+        local v = tonumber(Value)
+        if v and humanoid and humanoid.Parent then
+            humanoid.WalkSpeed = v
         end
-    end    
+    end
 })
 
--- JumpPower Slider
-PlayerTab:AddSlider({
+PlayerTab:AddTextbox({
     Name = "JumpPower",
-    Min = 0,
-    Max = 200,
-    Default = humanoid and humanoid.JumpPower or 50,
-    Increment = 1,
-    ValueName = "power",
+    Default = tostring(humanoid.JumpPower),
+    TextDisappear = true,
     Callback = function(Value)
-        if humanoid then
-            humanoid.UseJumpPower = true
-            humanoid.JumpPower = Value
+        local v = tonumber(Value)
+        if v and humanoid and humanoid.Parent then
+            humanoid.JumpPower = v
         end
-    end    
+    end
 })
 
--- Unlimited Jump
 PlayerTab:AddToggle({
     Name = "Unlimited Jump",
     Default = false,
     Callback = function(Value)
-        if Value then
-            local UIS = game:GetService("UserInputService")
-            UIS.JumpRequest:Connect(function()
-                if humanoid then
-                    humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-                end
-            end)
-        end
-    end    
+        unlimitedJump = Value
+    end
 })
 
--- TAB OPTIFINE
-local OptifineTab = Window:MakeTab({
+local FpsLabel = PlayerTab:AddLabel("FPS: 0")
+local CoordLabel = PlayerTab:AddLabel("XYZ: 0,0,0")
+
+-- === Optifine Tab ===
+local OptTab = Window:MakeTab({
     Name = "Optifine",
     Icon = "rbxassetid://4483345998",
     PremiumOnly = false
 })
-OptifineTab:AddLabel("Belum ada fitur di sini 👀")
 
--- TAB TELEPORT
-local TeleportTab = Window:MakeTab({
+OptTab:AddButton({
+    Name = "Optimize Mode",
+    Callback = function()
+        if isOptimized then return end
+        isOptimized = true
+        for _, obj in pairs(Workspace:GetDescendants()) do
+            if obj:IsA("BasePart") then
+                obj.Material = Enum.Material.SmoothPlastic
+                obj.Reflectance = 0
+                if obj:FindFirstChildOfClass("SurfaceAppearance") then
+                    obj:FindFirstChildOfClass("SurfaceAppearance"):Destroy()
+                end
+            elseif obj:IsA("ParticleEmitter") or obj:IsA("Fire") or obj:IsA("Smoke") then
+                obj.Enabled = false
+            elseif obj:IsA("Highlight") then
+                obj.Enabled = false
+            end
+        end
+        Lighting.GlobalShadows = false
+        Lighting.FogEnd = 1000000
+    end
+})
+
+OptTab:AddButton({
+    Name = "Ultra Optimize",
+    Callback = function()
+        if isUltraMode then return end
+        isUltraMode = true
+        Lighting.Technology = Enum.Technology.Legacy
+        Lighting.Brightness = 5
+        Lighting.Ambient = Color3.fromRGB(178,178,178)
+        Lighting.OutdoorAmbient = Color3.fromRGB(178,178,178)
+        for _, obj in pairs(Workspace:GetDescendants()) do
+            if obj:IsA("ParticleEmitter") or obj:IsA("Fire") or obj:IsA("Smoke") or obj:IsA("Sparkles") then
+                obj.Enabled = false
+            elseif obj:IsA("Atmosphere") then
+                obj.Density, obj.Offset, obj.Glare, obj.Haze = 0,0,0,0
+            elseif obj:IsA("Clouds") then
+                obj.Enabled = false
+            elseif obj:IsA("BloomEffect") or obj:IsA("BlurEffect") or obj:IsA("ColorCorrectionEffect") then
+                obj.Enabled = false
+            elseif obj:IsA("Highlight") then
+                obj.Enabled = false
+            elseif obj:IsA("SurfaceAppearance") then
+                obj:Destroy()
+            elseif obj:IsA("BasePart") then
+                obj.Material = Enum.Material.SmoothPlastic
+                obj.Reflectance = 0
+            end
+        end
+    end
+})
+
+-- === Teleport Tab ===
+local TpTab = Window:MakeTab({
     Name = "Teleport",
     Icon = "rbxassetid://4483345998",
     PremiumOnly = false
 })
 
--- Teleport ke player
-TeleportTab:AddTextbox({
-    Name = "Teleport ke Player",
-    Default = "",
+TpTab:AddTextbox({
+    Name = "Coordinates (x,y,z)",
+    Default = "0,0,0",
     TextDisappear = true,
     Callback = function(Value)
-        local target = Players:FindFirstChild(Value)
-        if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
-            player.Character:MoveTo(target.Character.HumanoidRootPart.Position)
-        else
-            OrionLib:MakeNotification({
-                Name = "Teleport Failed",
-                Content = "Player tidak ditemukan.",
-                Time = 3
-            })
+        if character and character:FindFirstChild("HumanoidRootPart") then
+            local coords = {}
+            for c in string.gmatch(Value,"[^,]+") do
+                table.insert(coords,tonumber(c))
+            end
+            if #coords == 3 then
+                character.HumanoidRootPart.CFrame = CFrame.new(coords[1], coords[2]+10, coords[3])
+            end
         end
-    end	  
+    end
 })
 
--- Save koordinat
-TeleportTab:AddButton({
-    Name = "Save Koordinat",
-    Callback = function()
-        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            savedPosition = player.Character.HumanoidRootPart.Position
-            OrionLib:MakeNotification({
-                Name = "Koordinat Disimpan",
-                Content = tostring(savedPosition),
-                Time = 3
-            })
-        end
-    end    
-})
+-- === Unlimited Jump Handler ===
+UserInputService.JumpRequest:Connect(function()
+    if unlimitedJump and humanoid and humanoid.Parent then
+        humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+    end
+end)
 
--- Teleport ke koordinat tersimpan
-TeleportTab:AddButton({
-    Name = "Teleport ke Koordinat",
-    Callback = function()
-        if savedPosition and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            player.Character.HumanoidRootPart.CFrame = CFrame.new(savedPosition)
-        else
-            OrionLib:MakeNotification({
-                Name = "Teleport Failed",
-                Content = "Belum ada koordinat tersimpan.",
-                Time = 3
-            })
-        end
-    end    
-})
+-- === FPS & Coords updater ===
+RunService.RenderStepped:Connect(function()
+    frameCount += 1
+    local now = tick()
+    if now - lastTime >= 1 then
+        fps = frameCount
+        frameCount, lastTime = 0, now
+        FpsLabel:Set("FPS: " .. fps)
+    end
+    if character and character:FindFirstChild("HumanoidRootPart") then
+        local pos = character.HumanoidRootPart.Position
+        CoordLabel:Set(string.format("XYZ: %.1f, %.1f, %.1f", pos.X,pos.Y,pos.Z))
+    end
+end)
 
+-- finish Orion
 OrionLib:Init()
