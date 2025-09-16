@@ -1,10 +1,8 @@
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/jensonhirst/Orion/main/source')))()
 local LocalPlayer = game:GetService("Players").LocalPlayer
 local Workspace = game:GetService("Workspace")
-local RunService = game:GetService("RunService")
 local Lighting = game:GetService("Lighting")
-local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
 
 local Window = OrionLib:MakeWindow({Name = "💫 VANYLA HUB", HidePremium = false, SaveConfig = true, ConfigFolder = "VanylaHub"})
 
@@ -19,13 +17,13 @@ local function setHumanoidProperty(prop, value)
     if char then
         local hum = char:FindFirstChildOfClass("Humanoid")
         if hum then
-            hum[prop] = value
+            hum[prop] = tonumber(value) or hum[prop]
         end
     end
 end
 
-PlayerTab:AddSlider({Name = "WalkSpeed", Min = 16, Max = 200, Default = 16, Color = Color3.fromRGB(0,255,0), Increment = 1, ValueName = "Speed", Callback = function(Value) setHumanoidProperty("WalkSpeed", Value) end})
-PlayerTab:AddSlider({Name = "JumpPower", Min = 50, Max = 300, Default = 50, Color = Color3.fromRGB(0,255,0), Increment = 1, ValueName = "Jump", Callback = function(Value) setHumanoidProperty("JumpPower", Value) end})
+PlayerTab:AddTextbox({Name = "WalkSpeed", Default = "16", TextDisappear = false, Callback = function(Value) setHumanoidProperty("WalkSpeed", Value) end})
+PlayerTab:AddTextbox({Name = "JumpPower", Default = "50", TextDisappear = false, Callback = function(Value) setHumanoidProperty("JumpPower", Value) end})
 
 local teleportFromBox = TeleportTab:AddTextbox({Name = "From Username", Default = "", TextDisappear = true, Callback = function() end})
 local teleportToBox = TeleportTab:AddTextbox({Name = "To Username", Default = "", TextDisappear = true, Callback = function() end})
@@ -69,11 +67,8 @@ local antiLagEnabled = false
 AntiLagTab:AddToggle({Name = "Anti-Lag", Default = false, Callback = function(Value)
     antiLagEnabled = Value
     if antiLagEnabled then
-        local originalSettings = {}
-        local optimizedParts = {}
         spawn(function()
             while antiLagEnabled do
-                local char = LocalPlayer.Character
                 Lighting.GlobalShadows = false
                 Lighting.Technology = Enum.Technology.Compatibility
                 Lighting.FogEnd = 1000000
