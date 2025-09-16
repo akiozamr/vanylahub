@@ -26,7 +26,6 @@ local Window = OrionLib:MakeWindow({
 })
 
 local TabPlayer = Window:MakeTab({Name="Player", Icon="rbxassetid://4483345998"})
-local fpsLabel = TabPlayer:AddLabel("FPS: 0")
 local coordLabel = TabPlayer:AddLabel("XYZ: 0,0,0")
 
 TabPlayer:AddTextbox({
@@ -186,21 +185,6 @@ TabTP:AddTextbox({
         end
     end
 })
-
-local fps, frameCount, lastTime = 0,0,tick()
-RunService.RenderStepped:Connect(function()
-    frameCount+=1
-    local now = tick()
-    if now - lastTime >= 1 then
-        fps=frameCount
-        frameCount,lastTime=0,now
-        fpsLabel:Set("FPS: "..fps)
-    end
-    if character and character:FindFirstChild("HumanoidRootPart") then
-        local pos=character.HumanoidRootPart.Position
-        coordLabel:Set(string.format("XYZ: %.1f, %.1f, %.1f",pos.X,pos.Y,pos.Z))
-    end
-end)
 
 UserInputService.JumpRequest:Connect(function()
     if unlimitedJump and humanoid and humanoid.Parent then
