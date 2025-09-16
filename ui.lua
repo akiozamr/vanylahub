@@ -9,133 +9,177 @@ local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
 local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/jensonhirst/Orion/main/source"))()
+
 local Window = OrionLib:MakeWindow({Name = "💫 VANYLA HUB", HidePremium = true, SaveConfig = true, ConfigFolder = "VanylaHub"})
 
-local Tab1 = Window:MakeTab({Name = "Player", Icon = "rbxassetid://4483345998"})
-local Tab2 = Window:MakeTab({Name = "Teleport", Icon = "rbxassetid://4483345998"})
-local Tab3 = Window:MakeTab({Name = "Performance", Icon = "rbxassetid://4483345998"})
+local PlayerTab = Window:MakeTab({Name = "Player", Icon = "rbxassetid://4483345998", PremiumOnly = false})
+local TeleportTab = Window:MakeTab({Name = "Teleport", Icon = "rbxassetid://4483345998", PremiumOnly = false})
+local OptiTab = Window:MakeTab({Name = "Opti", Icon = "rbxassetid://4483345998", PremiumOnly = false})
 
-local SectionPlayer = Tab1:AddSection({Name = "Player Settings"})
-local SectionTeleport = Tab2:AddSection({Name = "Teleport Settings"})
-local SectionPerf = Tab3:AddSection({Name = "Performance Settings"})
+local WalkSpeed = 16
+local JumpPower = 50
+local FPS = 0
+local lastTime = tick()
+local frameCount = 0
+local TeleCoords = {}
 
-local WalkSpeedTextbox = Tab1:AddTextbox({Name="Walkspeed",Default=tostring(player.Character and player.Character:FindFirstChildOfClass("Humanoid") and player.Character:FindFirstChildOfClass("Humanoid").WalkSpeed or 16),TextDisappear=true,Callback=function(Value)
-    local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
-    if humanoid then humanoid.WalkSpeed = tonumber(Value) or 16 end
-end})
+-- FPS Counter
+local fpsLabel = OptiTab:AddLabel("FPS: --")
 
-local JumpPowerTextbox = Tab1:AddTextbox({Name="JumpPower",Default=tostring(player.Character and player.Character:FindFirstChildOfClass("Humanoid") and player.Character:FindFirstChildOfClass("Humanoid").JumpPower or 50),TextDisappear=true,Callback=function(Value)
-    local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
-    if humanoid then humanoid.JumpPower = tonumber(Value) or 50 end
-end})
-
-Tab1:AddToggle({Name="Infinite Jump",Default=false,Callback=function(Value)
-    _G.InfiniteJump = Value
-end})
-
-Tab1:AddToggle({Name="NoClip",Default=false,Callback=function(Value)
-    _G.NoClip = Value
-end})
-
-Tab1:AddDropdown({Name="Animation",Default="None",Options={"None","Idle","Walk","Run","Jump"},Callback=function(Value)
-    local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
-    if humanoid then
-        if Value=="None" then humanoid:ChangeState(Enum.HumanoidStateType.Physics) else humanoid:LoadAnimation(Instance.new("Animation",{AnimationId="rbxassetid://0"})):Play() end
-    end
-end})
-
-local teleportPlayersDropdown = Tab2:AddDropdown({Name="Teleport to Player",Default="",Options={},Callback=function(Value)
-    local target = Players:FindFirstChild(Value)
-    if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-        player.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame
-    end
-end})
-
-local savedCoords = {}
-Tab2:AddButton({Name="Save Position",Callback=function()
-    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-        table.insert(savedCoords, player.Character.HumanoidRootPart.Position)
-        Tab2:AddButton({Name="Teleport to Coord "..#savedCoords,Callback=function()
-            if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                player.Character.HumanoidRootPart.CFrame = CFrame.new(savedCoords[#savedCoords])
-            end
-        end})
-    end
-end})
-
-Tab3:AddToggle({Name="Anti-Lag",Default=false,Callback=function(Value)
-    _G.AntiLag = Value
-    if Value then
-        Workspace.StreamingEnabled = true
-        Lighting.GlobalShadows = false
-        Lighting.Technology = Enum.Technology.Compatibility
-        Lighting.FogEnd = 1000000
-        Lighting.FogStart = 1000000
-        Lighting.Brightness = 3
-        Lighting.Ambient = Color3.fromRGB(128,128,128)
-        Lighting.OutdoorAmbient = Color3.fromRGB(128,128,128)
-        Lighting.ClockTime = 14
-        for _, obj in pairs(Workspace:GetDescendants()) do
-            if obj:IsA("BasePart") then
-                obj.Material = Enum.Material.SmoothPlastic
-                obj.CastShadow = false
-            elseif obj:IsA("ParticleEmitter") or obj:IsA("Fire") or obj:IsA("Smoke") or obj:IsA("Sparkles") then
-                obj.Enabled = false
-            elseif obj:IsA("PointLight") or obj:IsA("SpotLight") or obj:IsA("SurfaceLight") then
-                obj.Brightness = obj.Brightness * 0.3
-                obj.Range = math.min(obj.Range,10)
-            elseif obj:IsA("Atmosphere") then
-                obj.Density = 0
-                obj.Offset = 0
-                obj.Glare = 0
-                obj.Haze = 0
-            elseif obj:IsA("Clouds") then
-                obj.Enabled = false
-            elseif obj:IsA("BloomEffect") or obj:IsA("BlurEffect") or obj:IsA("ColorCorrectionEffect") then
-                obj.Enabled = false
-            end
-        end
-    end
-end})
-
-local fpsLabel = Tab3:AddLabel("FPS: --")
-local frameCount,lastTime,fps = 0,tick(),0
 RunService.Heartbeat:Connect(function()
     frameCount = frameCount + 1
     local currentTime = tick()
-    if currentTime-lastTime>=0.5 then
-        fps = frameCount/(currentTime-lastTime)
-        frameCount,lastTime = 0,currentTime
-        fpsLabel:Set(string.format("FPS: %.0f",fps))
+    if currentTime - lastTime >= 0.5 then
+        FPS = frameCount / (currentTime - lastTime)
+        frameCount = 0
+        lastTime = currentTime
+        fpsLabel:Set("FPS: "..math.floor(FPS))
     end
 end)
 
-Players.PlayerAdded:Connect(function(plr)
-    table.insert(teleportPlayersDropdown.Options, plr.Name)
-    teleportPlayersDropdown:Refresh(teleportPlayersDropdown.Options,true)
-end)
+-- WalkSpeed & Jump
+PlayerTab:AddTextbox({Name="Walkspeed | "..WalkSpeed, Default=tostring(WalkSpeed), TextDisappear=true, Callback=function(val)
+    WalkSpeed = tonumber(val) or 16
+    player.Character.Humanoid.WalkSpeed = WalkSpeed
+end})
 
-for _,plr in pairs(Players:GetPlayers()) do
-    if plr ~= player then
-        table.insert(teleportPlayersDropdown.Options, plr.Name)
+PlayerTab:AddTextbox({Name="JumpPower | "..JumpPower, Default=tostring(JumpPower), TextDisappear=true, Callback=function(val)
+    JumpPower = tonumber(val) or 50
+    player.Character.Humanoid.JumpPower = JumpPower
+end})
+
+-- Morph Player
+local function MorphPlayer(targetPlayer)
+    local success, char = pcall(function()
+        return targetPlayer.Character:Clone()
+    end)
+    if success and char then
+        char.Parent = Workspace
+        char:SetPrimaryPartCFrame(player.Character.PrimaryPart.CFrame)
+        player.Character:Destroy()
+        player.Character = char
     end
 end
-teleportPlayersDropdown:Refresh(teleportPlayersDropdown.Options,true)
 
-OrionLib:Init()
-
-game:GetService("UserInputService").JumpRequest:Connect(function()
-    if _G.InfiniteJump and player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
-        player.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
-    end
-end)
-
-RunService.Stepped:Connect(function()
-    if _G.NoClip and player.Character then
-        for _,part in pairs(player.Character:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.CanCollide = false
-            end
+local PlayerDropdown
+local function RefreshPlayerDropdown()
+    local plrList = {}
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= player then
+            table.insert(plrList, p.Name)
         end
     end
-end)
+    if PlayerDropdown then
+        PlayerDropdown:Refresh(plrList, true)
+    else
+        PlayerDropdown = PlayerTab:AddDropdown({Name="Morph Player", Default="", Options=plrList, Callback=function(val)
+            local plr = Players:FindFirstChild(val)
+            if plr then MorphPlayer(plr) end
+        end})
+    end
+end
+RefreshPlayerDropdown()
+Players.PlayerAdded:Connect(RefreshPlayerDropdown)
+Players.PlayerRemoving:Connect(RefreshPlayerDropdown)
+
+-- Teleport
+local TPPlayerDropdown
+local function RefreshTPDropdown()
+    local plrList = {}
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= player then
+            table.insert(plrList, p.Name)
+        end
+    end
+    if TPPlayerDropdown then
+        TPPlayerDropdown:Refresh(plrList, true)
+    else
+        TPPlayerDropdown = TeleportTab:AddDropdown({Name="Teleport to Player", Default="", Options=plrList, Callback=function(val)
+            local plr = Players:FindFirstChild(val)
+            if plr and plr.Character and plr.Character.PrimaryPart then
+                player.Character:SetPrimaryPartCFrame(plr.Character.PrimaryPart.CFrame + Vector3.new(0,5,0))
+            end
+        end})
+    end
+end
+RefreshTPDropdown()
+Players.PlayerAdded:Connect(RefreshTPDropdown)
+Players.PlayerRemoving:Connect(RefreshTPDropdown)
+
+-- Save Teleport Coordinates
+local SaveCoordDropdown
+local function RefreshSaveCoordDropdown()
+    local list = {}
+    for i=1,#TeleCoords do
+        table.insert(list,"Coordinate "..i)
+    end
+    if SaveCoordDropdown then
+        SaveCoordDropdown:Refresh(list,true)
+    else
+        SaveCoordDropdown = TeleportTab:AddDropdown({Name="Teleport Saved", Default="", Options=list, Callback=function(val)
+            local idx = tonumber(val:match("%d+"))
+            if idx and TeleCoords[idx] then
+                player.Character:SetPrimaryPartCFrame(TeleCoords[idx])
+            end
+        end})
+    end
+end
+
+TeleportTab:AddButton({Name="Save Current Coordinate", Callback=function()
+    table.insert(TeleCoords, player.Character.PrimaryPart.CFrame)
+    RefreshSaveCoordDropdown()
+end})
+
+-- Anti-Lag Optimizer
+local OriginalSettings = {}
+local Optimized = false
+local function AntiLag()
+    if Optimized then return end
+    OriginalSettings = {
+        GlobalShadows = Lighting.GlobalShadows,
+        FogEnd = Lighting.FogEnd,
+        FogStart = Lighting.FogStart,
+        Brightness = Lighting.Brightness,
+        Ambient = Lighting.Ambient,
+        OutdoorAmbient = Lighting.OutdoorAmbient,
+        Technology = Lighting.Technology
+    }
+    Lighting.GlobalShadows = false
+    Lighting.FogEnd = 1000000
+    Lighting.FogStart = 1000000
+    Lighting.Brightness = 3
+    Lighting.Ambient = Color3.fromRGB(128,128,128)
+    Lighting.OutdoorAmbient = Color3.fromRGB(128,128,128)
+    Lighting.Technology = Enum.Technology.Compatibility
+    for _, obj in pairs(Workspace:GetDescendants()) do
+        if obj:IsA("BasePart") then
+            obj.Material = Enum.Material.SmoothPlastic
+            obj.CastShadow = false
+            obj.TopSurface = Enum.SurfaceType.Smooth
+            obj.BottomSurface = Enum.SurfaceType.Smooth
+            obj.LeftSurface = Enum.SurfaceType.Smooth
+            obj.RightSurface = Enum.SurfaceType.Smooth
+            obj.FrontSurface = Enum.SurfaceType.Smooth
+            obj.BackSurface = Enum.SurfaceType.Smooth
+        elseif obj:IsA("ParticleEmitter") or obj:IsA("Fire") or obj:IsA("Smoke") or obj:IsA("Sparkles") then
+            obj.Enabled = false
+        elseif obj:IsA("Atmosphere") then
+            obj.Density = 0
+            obj.Offset = 0
+            obj.Glare = 0
+            obj.Haze = 0
+        elseif obj:IsA("Clouds") then
+            obj.Enabled = false
+        elseif obj:IsA("PointLight") or obj:IsA("SpotLight") or obj:IsA("SurfaceLight") then
+            obj.Brightness = obj.Brightness*0.3
+            obj.Range = math.min(obj.Range,10)
+        end
+    end
+    collectgarbage("collect")
+    Optimized = true
+end
+OptiTab:AddToggle({Name="Anti-Lag", Default=false, Callback=function(val)
+    if val then AntiLag() end
+end})
+
+OrionLib:Init()
