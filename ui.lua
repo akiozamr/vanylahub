@@ -7,14 +7,13 @@ local Window = OrionLib:MakeWindow({
 	ConfigFolder = "VANYLAHub"
 })
 
--- PLAYER TAB
-local PlayerTab = Window:MakeTab({Name = "Player", Icon = "rbxassetid://4483345998", PremiumOnly = false})
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 
--- Walkspeed
+local PlayerTab = Window:MakeTab({Name = "Player", Icon = "rbxassetid://4483345998", PremiumOnly = false})
+
 local WalkSpeedBox = PlayerTab:AddTextbox({
 	Name = "WalkSpeed",
 	Default = tostring(LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") and LocalPlayer.Character:FindFirstChildOfClass("Humanoid").WalkSpeed or 16),
@@ -26,7 +25,6 @@ local WalkSpeedBox = PlayerTab:AddTextbox({
 	end
 })
 
--- JumpPower
 local JumpBox = PlayerTab:AddTextbox({
 	Name = "JumpPower",
 	Default = tostring(LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") and LocalPlayer.Character:FindFirstChildOfClass("Humanoid").JumpPower or 50),
@@ -38,7 +36,6 @@ local JumpBox = PlayerTab:AddTextbox({
 	end
 })
 
--- Unlimited Jump
 local UnlimitedJump = false
 PlayerTab:AddToggle({
 	Name = "Unlimited Jump",
@@ -55,28 +52,36 @@ UIS.JumpRequest:Connect(function()
 	end
 end)
 
--- Morph Player
-PlayerTab:AddButton({
+PlayerTab:AddDropdown({
 	Name = "Morph Player",
-	Callback = function()
-		local Target = nil
+	Default = "",
+	Options = function()
+		local list = {}
 		for _,v in pairs(Players:GetPlayers()) do
 			if v ~= LocalPlayer then
-				Target = v
-				break
+				table.insert(list, v.Name)
 			end
 		end
-		if Target and Target.Character then
-			local CloneChar = Target.Character:Clone()
+		return list
+	end,
+	Callback = function(Value)
+		local target = Players:FindFirstChild(Value)
+		if target and target.Character then
+			local CloneChar = target.Character:Clone()
 			CloneChar.Parent = workspace
 			LocalPlayer.Character:Destroy()
 			LocalPlayer.Character = CloneChar
-			LocalPlayer.Character.HumanoidRootPart.CFrame = Target.Character.HumanoidRootPart.CFrame
+			LocalPlayer.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame
+			OrionLib:MakeNotification({
+				Name = "Morph Success!",
+				Content = "Kamu sekarang morph jadi "..Value,
+				Image = "rbxassetid://4483345998",
+				Time = 3
+			})
 		end
 	end
 })
 
--- OPTIFINE TAB
 local OptifineTab = Window:MakeTab({Name = "Optifine", Icon = "rbxassetid://4483345998", PremiumOnly = false})
 OptifineTab:AddButton({
 	Name = "Anti Lag",
@@ -85,12 +90,10 @@ OptifineTab:AddButton({
 	end
 })
 
--- TELEPORT TAB
 local TeleportTab = Window:MakeTab({Name = "Teleport", Icon = "rbxassetid://4483345998", PremiumOnly = false})
 
 local SavedCoords = {}
 
--- Teleport ke pemain
 TeleportTab:AddDropdown({
 	Name = "Teleport ke Pemain",
 	Default = "",
@@ -109,7 +112,6 @@ TeleportTab:AddDropdown({
 	end
 })
 
--- Save koordinat
 TeleportTab:AddButton({
 	Name = "Save Koordinat",
 	Callback = function()
@@ -125,7 +127,6 @@ TeleportTab:AddButton({
 	end
 })
 
--- Teleport ke koordinat
 TeleportTab:AddDropdown({
 	Name = "Teleport ke Koordinat",
 	Default = "",
