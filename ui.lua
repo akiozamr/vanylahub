@@ -1,265 +1,291 @@
--- 💫 VANYLA HUB (Rounded UI)
+-- 💫 VANYLA HUB
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
-local UIS = game:GetService("UserInputService")
+local savedCFrame = nil
+local minimized = false
 
--- GUI Utama
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "VanylaHub"
-ScreenGui.Parent = player:WaitForChild("PlayerGui")
-ScreenGui.ResetOnSpawn = false
+-- ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Parent = player:WaitForChild("PlayerGui")
 
--- Frame Utama
-local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 300, 0, 250)
-MainFrame.Position = UDim2.new(0.3, 0, 0.3, 0)
-MainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-MainFrame.BorderSizePixel = 0
-MainFrame.Active = true
-MainFrame.Draggable = true
-MainFrame.Parent = ScreenGui
+-- Main Frame
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 330, 0, 370)
+mainFrame.Position = UDim2.new(0.3, 0, 0.2, 0)
+mainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+mainFrame.Active = true
+mainFrame.Draggable = true
+mainFrame.Parent = screenGui
+Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 10)
 
--- Round Frame
-local UICornerMain = Instance.new("UICorner")
-UICornerMain.CornerRadius = UDim.new(0, 10)
-UICornerMain.Parent = MainFrame
+-- Title Bar
+local titleBar = Instance.new("Frame")
+titleBar.Size = UDim2.new(1, 0, 0, 35)
+titleBar.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+titleBar.Parent = mainFrame
+Instance.new("UICorner", titleBar).CornerRadius = UDim.new(0, 10)
 
--- Judul
-local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, -30, 0, 30)
-Title.Position = UDim2.new(0, 10, 0, 0)
-Title.BackgroundTransparency = 1
-Title.Text = "💫 VANYLA HUB"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.TextSize = 16
-Title.Font = Enum.Font.GothamBold
-Title.TextXAlignment = Enum.TextXAlignment.Left
-Title.Parent = MainFrame
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, -60, 1, 0)
+title.Position = UDim2.new(0, 10, 0, 0)
+title.BackgroundTransparency = 1
+title.Text = "💫 VANYLA HUB"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 16
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Parent = titleBar
 
--- Tombol Minimize
-local Minimize = Instance.new("TextButton")
-Minimize.Size = UDim2.new(0, 30, 0, 25)
-Minimize.Position = UDim2.new(1, -35, 0, 3)
-Minimize.Text = "-"
-Minimize.TextSize = 18
-Minimize.Font = Enum.Font.GothamBold
-Minimize.TextColor3 = Color3.fromRGB(255, 255, 255)
-Minimize.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-Minimize.Parent = MainFrame
-local UICornerMin = Instance.new("UICorner", Minimize)
-UICornerMin.CornerRadius = UDim.new(0, 6)
+local minimizeBtn = Instance.new("TextButton")
+minimizeBtn.Size = UDim2.new(0, 50, 0, 25)
+minimizeBtn.Position = UDim2.new(1, -55, 0.5, -12)
+minimizeBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+minimizeBtn.Text = "-"
+minimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+minimizeBtn.Font = Enum.Font.GothamBold
+minimizeBtn.TextSize = 18
+minimizeBtn.Parent = titleBar
+Instance.new("UICorner", minimizeBtn).CornerRadius = UDim.new(0, 6)
 
--- Konten Frame
-local Content = Instance.new("Frame")
-Content.Size = UDim2.new(1, -20, 1, -50)
-Content.Position = UDim2.new(0, 10, 0, 40)
-Content.BackgroundTransparency = 1
-Content.Parent = MainFrame
+-- Tabs
+local tabFrame = Instance.new("Frame")
+tabFrame.Size = UDim2.new(1, 0, 0, 35)
+tabFrame.Position = UDim2.new(0, 0, 0, 35)
+tabFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+tabFrame.Parent = mainFrame
 
--- Tab Holder
-local TabHolder = Instance.new("Frame")
-TabHolder.Size = UDim2.new(1, 0, 0, 30)
-TabHolder.Position = UDim2.new(0, 0, 0, 0)
-TabHolder.BackgroundTransparency = 1
-TabHolder.Parent = Content
+local tabLayout = Instance.new("UIListLayout", tabFrame)
+tabLayout.FillDirection = Enum.FillDirection.Horizontal
+tabLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+tabLayout.SortOrder = Enum.SortOrder.LayoutOrder
+tabLayout.Padding = UDim.new(0, 5)
 
--- Fungsi Buat Tab
-local function createTab(name, order)
-    local button = Instance.new("TextButton")
-    button.Size = UDim2.new(0, 90, 0, 25)
-    button.Position = UDim2.new(0, (order - 1) * 95, 0, 0)
-    button.Text = name
-    button.Font = Enum.Font.GothamBold
-    button.TextSize = 14
-    button.TextColor3 = Color3.fromRGB(255, 255, 255)
-    button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    button.Parent = TabHolder
-    local UICorner = Instance.new("UICorner", button)
-    UICorner.CornerRadius = UDim.new(0, 6)
-    return button
+local function createTab(name)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0, 100, 1, 0)
+    btn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+    btn.Text = name
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Font = Enum.Font.Gotham
+    btn.TextSize = 14
+    btn.Parent = tabFrame
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
+    return btn
 end
 
--- Halaman
-local Pages = {}
+local playerTab = createTab("Player")
+local optifineTab = createTab("Optifine")
+local teleportTab = createTab("Teleport")
+
+-- Content
+local content = Instance.new("Frame")
+content.Size = UDim2.new(1, 0, 1, -70)
+content.Position = UDim2.new(0, 0, 0, 70)
+content.BackgroundTransparency = 1
+content.Parent = mainFrame
+
+local pages = {}
 
 local function createPage(name)
     local page = Instance.new("Frame")
-    page.Size = UDim2.new(1, 0, 1, -40)
-    page.Position = UDim2.new(0, 0, 0, 35)
+    page.Size = UDim2.new(1, -20, 1, -20)
+    page.Position = UDim2.new(0, 10, 0, 10)
     page.BackgroundTransparency = 1
     page.Visible = false
-    page.Parent = Content
-    Pages[name] = page
+    page.Parent = content
+
+    local layout = Instance.new("UIListLayout", page)
+    layout.SortOrder = Enum.SortOrder.LayoutOrder
+    layout.Padding = UDim.new(0, 8)
+
+    local padding = Instance.new("UIPadding", page)
+    padding.PaddingLeft = UDim.new(0, 5)
+    padding.PaddingTop = UDim.new(0, 5)
+
+    pages[name] = page
     return page
 end
 
--- === Tab ===
-local playerTab = createTab("Player", 1)
-local optifineTab = createTab("Optifine", 2)
-local teleportTab = createTab("Teleport", 3)
-
--- === Page ===
 local playerPage = createPage("Player")
 local optifinePage = createPage("Optifine")
 local teleportPage = createPage("Teleport")
 
--- Fungsi Switch Page
-local function switchPage(name)
-    for _, p in pairs(Pages) do
-        p.Visible = false
+-- Fungsi Tab
+local function showPage(name)
+    for _, page in pairs(pages) do
+        page.Visible = false
     end
-    Pages[name].Visible = true
+    pages[name].Visible = true
+end
+showPage("Player")
+
+playerTab.MouseButton1Click:Connect(function() showPage("Player") end)
+optifineTab.MouseButton1Click:Connect(function() showPage("Optifine") end)
+teleportTab.MouseButton1Click:Connect(function() showPage("Teleport") end)
+
+-- === Player Page ===
+local function createLabel(text, parent)
+    local lbl = Instance.new("TextLabel")
+    lbl.Size = UDim2.new(1, -20, 0, 25)
+    lbl.BackgroundTransparency = 1
+    lbl.Text = text
+    lbl.TextColor3 = Color3.fromRGB(255, 255, 255)
+    lbl.Font = Enum.Font.Gotham
+    lbl.TextSize = 14
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
+    lbl.Parent = parent
+    return lbl
 end
 
--- Default Page
-switchPage("Player")
+local function createButtonRow(parent, labels)
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(1, -20, 0, 30)
+    frame.BackgroundTransparency = 1
+    frame.Parent = parent
 
--- Tab Event
-playerTab.MouseButton1Click:Connect(function() switchPage("Player") end)
-optifineTab.MouseButton1Click:Connect(function() switchPage("Optifine") end)
-teleportTab.MouseButton1Click:Connect(function() switchPage("Teleport") end)
+    local layout = Instance.new("UIListLayout", frame)
+    layout.FillDirection = Enum.FillDirection.Horizontal
+    layout.Padding = UDim.new(0, 5)
 
--- Minimize Toggle
-local minimized = false
-Minimize.MouseButton1Click:Connect(function()
-    minimized = not minimized
-    Content.Visible = not minimized
-    if minimized then
-        MainFrame.Size = UDim2.new(0, 300, 0, 40)
-        Minimize.Text = "+"
-    else
-        MainFrame.Size = UDim2.new(0, 300, 0, 250)
-        Minimize.Text = "-"
+    for _, text in ipairs(labels) do
+        local btn = Instance.new("TextButton")
+        btn.Size = UDim2.new(0, 40, 1, 0)
+        btn.Text = text
+        btn.Font = Enum.Font.GothamBold
+        btn.TextSize = 18
+        btn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        btn.Parent = frame
+        Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
     end
-end)
 
--- === Isi Player Page ===
-local walkLabel = Instance.new("TextLabel")
-walkLabel.Size = UDim2.new(0, 200, 0, 25)
-walkLabel.Position = UDim2.new(0, 10, 0, 10)
-walkLabel.BackgroundTransparency = 1
-walkLabel.Text = "WalkSpeed: " .. player.Character.Humanoid.WalkSpeed
-walkLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-walkLabel.Font = Enum.Font.Gotham
-walkLabel.TextSize = 14
-walkLabel.TextXAlignment = Enum.TextXAlignment.Left
-walkLabel.Parent = playerPage
+    return frame
+end
 
-local plusWalk = Instance.new("TextButton")
-plusWalk.Size = UDim2.new(0, 30, 0, 25)
-plusWalk.Position = UDim2.new(0, 220, 0, 10)
-plusWalk.Text = "+"
-plusWalk.Font = Enum.Font.GothamBold
-plusWalk.TextSize = 18
-plusWalk.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-plusWalk.TextColor3 = Color3.fromRGB(255, 255, 255)
-plusWalk.Parent = playerPage
-Instance.new("UICorner", plusWalk).CornerRadius = UDim.new(0, 6)
-
-local minusWalk = plusWalk:Clone()
-minusWalk.Text = "-"
-minusWalk.Position = UDim2.new(0, 260, 0, 10)
-minusWalk.Parent = playerPage
+-- WalkSpeed Control
+local walkLabel = createLabel("WalkSpeed: " .. player.Character.Humanoid.WalkSpeed, playerPage)
+local walkFrame = createButtonRow(playerPage, {"+", "-"})
+local plusWalk, minusWalk = walkFrame:GetChildren()[2], walkFrame:GetChildren()[3]
 
 plusWalk.MouseButton1Click:Connect(function()
-    local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
-    if hum then
-        hum.WalkSpeed = hum.WalkSpeed + 2
-        walkLabel.Text = "WalkSpeed: " .. hum.WalkSpeed
-    end
+    player.Character.Humanoid.WalkSpeed += 2
+    walkLabel.Text = "WalkSpeed: " .. player.Character.Humanoid.WalkSpeed
+end)
+minusWalk.MouseButton1Click:Connect(function()
+    player.Character.Humanoid.WalkSpeed -= 2
+    walkLabel.Text = "WalkSpeed: " .. player.Character.Humanoid.WalkSpeed
 end)
 
-minusWalk.MouseButton1Click:Connect(function()
-    local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
-    if hum then
-        hum.WalkSpeed = hum.WalkSpeed - 2
-        walkLabel.Text = "WalkSpeed: " .. hum.WalkSpeed
-    end
+-- Jump Control
+local jumpLabel = createLabel("JumpPower: " .. player.Character.Humanoid.JumpPower, playerPage)
+local jumpFrame = createButtonRow(playerPage, {"+", "-"})
+local plusJump, minusJump = jumpFrame:GetChildren()[2], jumpFrame:GetChildren()[3]
+
+plusJump.MouseButton1Click:Connect(function()
+    player.Character.Humanoid.JumpPower += 5
+    jumpLabel.Text = "JumpPower: " .. player.Character.Humanoid.JumpPower
+end)
+minusJump.MouseButton1Click:Connect(function()
+    player.Character.Humanoid.JumpPower -= 5
+    jumpLabel.Text = "JumpPower: " .. player.Character.Humanoid.JumpPower
 end)
 
 -- Unlimited Jump
-local jumpToggle = Instance.new("TextButton")
-jumpToggle.Size = UDim2.new(0, 180, 0, 25)
-jumpToggle.Position = UDim2.new(0, 10, 0, 50)
-jumpToggle.Text = "Unlimited Jump: OFF"
-jumpToggle.Font = Enum.Font.GothamBold
-jumpToggle.TextSize = 14
-jumpToggle.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-jumpToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
-jumpToggle.Parent = playerPage
-Instance.new("UICorner", jumpToggle).CornerRadius = UDim.new(0, 6)
+local unliJumpBtn = Instance.new("TextButton")
+unliJumpBtn.Size = UDim2.new(1, -20, 0, 30)
+unliJumpBtn.Text = "Unlimited Jump"
+unliJumpBtn.Font = Enum.Font.Gotham
+unliJumpBtn.TextSize = 14
+unliJumpBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+unliJumpBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+unliJumpBtn.Parent = playerPage
+Instance.new("UICorner", unliJumpBtn).CornerRadius = UDim.new(0, 6)
 
-local unlimitedJump = false
-jumpToggle.MouseButton1Click:Connect(function()
-    unlimitedJump = not unlimitedJump
-    jumpToggle.Text = "Unlimited Jump: " .. (unlimitedJump and "ON" or "OFF")
+local unliJump = false
+unliJumpBtn.MouseButton1Click:Connect(function()
+    unliJump = not unliJump
+    unliJumpBtn.Text = "Unlimited Jump: " .. tostring(unliJump)
 end)
 
-UIS.JumpRequest:Connect(function()
-    if unlimitedJump and player.Character and player.Character:FindFirstChildOfClass("Humanoid") then
+game:GetService("UserInputService").JumpRequest:Connect(function()
+    if unliJump and player.Character then
         player.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
     end
 end)
 
 -- === Teleport Page ===
 local tpBox = Instance.new("TextBox")
-tpBox.Size = UDim2.new(0, 180, 0, 25)
-tpBox.Position = UDim2.new(0, 10, 0, 10)
+tpBox.Size = UDim2.new(1, -20, 0, 30)
 tpBox.PlaceholderText = "Username"
 tpBox.Text = ""
-tpBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-tpBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 tpBox.Font = Enum.Font.Gotham
 tpBox.TextSize = 14
+tpBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+tpBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 tpBox.Parent = teleportPage
 Instance.new("UICorner", tpBox).CornerRadius = UDim.new(0, 6)
 
-local tpButton = Instance.new("TextButton")
-tpButton.Size = UDim2.new(0, 80, 0, 25)
-tpButton.Position = UDim2.new(0, 200, 0, 10)
-tpButton.Text = "Teleport"
-tpButton.Font = Enum.Font.GothamBold
-tpButton.TextSize = 14
-tpButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-tpButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-tpButton.Parent = teleportPage
-Instance.new("UICorner", tpButton).CornerRadius = UDim.new(0, 6)
+local tpBtn = Instance.new("TextButton")
+tpBtn.Size = UDim2.new(1, -20, 0, 30)
+tpBtn.Text = "Teleport to Player"
+tpBtn.Font = Enum.Font.Gotham
+tpBtn.TextSize = 14
+tpBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+tpBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+tpBtn.Parent = teleportPage
+Instance.new("UICorner", tpBtn).CornerRadius = UDim.new(0, 6)
 
-tpButton.MouseButton1Click:Connect(function()
+tpBtn.MouseButton1Click:Connect(function()
     local target = Players:FindFirstChild(tpBox.Text)
     if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
-        player.Character:MoveTo(target.Character.HumanoidRootPart.Position + Vector3.new(2,0,2))
+        player.Character:PivotTo(target.Character.HumanoidRootPart.CFrame)
     end
 end)
 
--- Save & Teleport Koordinat
-local savedPos = nil
-
 local saveBtn = Instance.new("TextButton")
-saveBtn.Size = UDim2.new(0, 120, 0, 25)
-saveBtn.Position = UDim2.new(0, 10, 0, 50)
-saveBtn.Text = "Save Koordinat"
-saveBtn.Font = Enum.Font.GothamBold
+saveBtn.Size = UDim2.new(1, -20, 0, 30)
+saveBtn.Text = "Save Coordinate"
+saveBtn.Font = Enum.Font.Gotham
 saveBtn.TextSize = 14
 saveBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
 saveBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 saveBtn.Parent = teleportPage
 Instance.new("UICorner", saveBtn).CornerRadius = UDim.new(0, 6)
 
-local tpSavedBtn = saveBtn:Clone()
-tpSavedBtn.Text = "Teleport Koordinat"
-tpSavedBtn.Size = UDim2.new(0, 150, 0, 25)
-tpSavedBtn.Position = UDim2.new(0, 150, 0, 50)
-tpSavedBtn.Parent = teleportPage
-
 saveBtn.MouseButton1Click:Connect(function()
     if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-        savedPos = player.Character.HumanoidRootPart.Position
+        savedCFrame = player.Character.HumanoidRootPart.CFrame
     end
 end)
 
-tpSavedBtn.MouseButton1Click:Connect(function()
-    if savedPos and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-        player.Character:MoveTo(savedPos)
+local loadBtn = Instance.new("TextButton")
+loadBtn.Size = UDim2.new(1, -20, 0, 30)
+loadBtn.Text = "Teleport to Saved Coordinate"
+loadBtn.Font = Enum.Font.Gotham
+loadBtn.TextSize = 14
+loadBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+loadBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+loadBtn.Parent = teleportPage
+Instance.new("UICorner", loadBtn).CornerRadius = UDim.new(0, 6)
+
+loadBtn.MouseButton1Click:Connect(function()
+    if savedCFrame then
+        player.Character:PivotTo(savedCFrame)
+    end
+end)
+
+-- === Minimize ===
+minimizeBtn.MouseButton1Click:Connect(function()
+    minimized = not minimized
+    if minimized then
+        content.Visible = false
+        tabFrame.Visible = false
+        mainFrame.Size = UDim2.new(0, 330, 0, 40)
+        minimizeBtn.Text = "+"
+    else
+        content.Visible = true
+        tabFrame.Visible = true
+        mainFrame.Size = UDim2.new(0, 330, 0, 370)
+        minimizeBtn.Text = "-"
     end
 end)
