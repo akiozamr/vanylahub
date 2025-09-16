@@ -1,193 +1,471 @@
+-- VANYLA HUB (💫)
+-- Universal-ish Orion UI hub with common player utilities and config support.
+
+-- Boot Orion
+local success, OrionLib = pcall(function()
+    return loadstring(game:HttpGet(('https://raw.githubusercontent.com/jensonhirst/Orion/main/source')))()
+end)
+
+if not success or not OrionLib then
+    warn("Gagal load OrionLib.")
+    return
+end
+
+-- Window
+local Window = OrionLib:MakeWindow({
+    Name = "💫 VANYLA HUB",
+    HidePremium = false,
+    SaveConfig = true,
+    ConfigFolder = "VANYLA_HUB_Config",
+    IntroEnabled = true,
+    IntroText = "Welcome to VANYLA HUB",
+    IntroIcon = "rbxassetid://4483345998"
+})
+
+-- Tabs
+local mainTab = Window:MakeTab({Name = "Main", Icon = "rbxassetid://4483345998", PremiumOnly = false})
+local playerTab = Window:MakeTab({Name = "Player", Icon = "rbxassetid://4483345998", PremiumOnly = false})
+local teleportTab = Window:MakeTab({Name = "Teleports", Icon = "rbxassetid://4483345998", PremiumOnly = false})
+local miscTab = Window:MakeTab({Name = "Misc", Icon = "rbxassetid://4483345998", PremiumOnly = false})
+local uiTab = Window:MakeTab({Name = "UI", Icon = "rbxassetid://4483345998", PremiumOnly = false})
+
+-- Sections
+local infoSection = mainTab:AddSection({Name = "Info"})
+local utilitiesSection = mainTab:AddSection({Name = "Utilities"})
+local movementSection = playerTab:AddSection({Name = "Movement"})
+local teleportSection = teleportTab:AddSection({Name = "Teleports"})
+local miscSection = miscTab:AddSection({Name = "Misc"})
+local uiSection = uiTab:AddSection({Name = "Config & UI"})
+
+-- Basic info
+mainTab:AddLabel("💫 VANYLA HUB - Universal Tools")
+mainTab:AddParagraph("Notes", "Designed to be broadly compatible across maps. Some features depend on the game allowing local property changes.")
+
+-- Helper references
 local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
-local Lighting = game:GetService("Lighting")
-local Workspace = game:GetService("Workspace")
-local UserInputService = game:GetService("UserInputService")
 local TeleportService = game:GetService("TeleportService")
 
-local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoid = character:WaitForChild("Humanoid")
-player.CharacterAdded:Connect(function(char)
-	character = char
-	humanoid = char:WaitForChild("Humanoid")
-end)
-
-local unlimitedJump = false
-local isOptimized, isUltraMode = false, false
-local optimizedParts = {}
-local hiddenPlayers, tagHidden = false, false
-local espEnabled = false
-local espObjects = {}
-local flyEnabled = false
-local flySpeed = 50
-local flyBody = nil
-local noclipEnabled = false
-local godEnabled = false
-local antiAfkEnabled = false
-
-local OrionLib = loadstring(game:HttpGet('https://raw.githubusercontent.com/jensonhirst/Orion/main/source'))()
-local Window = OrionLib:MakeWindow({Name="VANYLA HUB",HidePremium=false,SaveConfig=true,ConfigFolder="VanylaHub"})
-
-local TabPlayer = Window:MakeTab({Name="Player",Icon="rbxassetid://4483345998"})
-local TabVisual = Window:MakeTab({Name="Visual",Icon="rbxassetid://4483345998"})
-local TabUtil = Window:MakeTab({Name="Utility",Icon="rbxassetid://4483345998"})
-local TabFun = Window:MakeTab({Name="Fun",Icon="rbxassetid://4483345998"})
-local TabOpti = Window:MakeTab({Name="Optifine",Icon="rbxassetid://4483345998"})
-local TabTP = Window:MakeTab({Name="Teleport",Icon="rbxassetid://4483345998"})
-
-TabPlayer:AddTextbox({Name="WalkSpeed",Default=tostring(humanoid.WalkSpeed),TextDisappear=false,Callback=function(v)local n=tonumber(v) if n and humanoid and humanoid.Parent then humanoid.WalkSpeed=n end end})
-TabPlayer:AddTextbox({Name="JumpPower",Default=tostring(humanoid.JumpPower),TextDisappear=false,Callback=function(v)local n=tonumber(v) if n and humanoid and humanoid.Parent then humanoid.JumpPower=n end end})
-TabPlayer:AddToggle({Name="Unlimited Jump",Default=false,Callback=function(v) unlimitedJump=v end})
-TabPlayer:AddToggle({Name="NoClip",Default=false,Callback=function(v) noclipEnabled=v end})
-TabPlayer:AddToggle({Name="Fly",Default=false,Callback=function(v) flyEnabled=v if not flyEnabled and flyBody then flyBody:Destroy() flyBody=nil end end})
-TabPlayer:AddSlider({Name="Fly Speed",Min=10,Max=200,Default=50,Increment=5,ValueName="speed",Callback=function(v) flySpeed=v end})
-TabPlayer:AddToggle({Name="GodMode",Default=false,Callback=function(v) godEnabled=v if godEnabled and humanoid then humanoid.MaxHealth=9e9 humanoid.Health=humanoid.MaxHealth end end})
-TabPlayer:AddButton({Name="Sit / Stand",Callback=function() if humanoid then humanoid.Sit = not humanoid.Sit end end})
-
-TabVisual:AddToggle({Name="ESP",Default=false,Callback=function(v) espEnabled=v if not espEnabled then for _,obj in pairs(espObjects) do if obj and obj.Parent then obj:Destroy() end end espObjects={} end end})
-TabVisual:AddToggle({Name="FullBright",Default=false,Callback=function(v) if v then pcall(function() Lighting.Ambient=Color3.fromRGB(255,255,255) Lighting.Brightness=2 end) else pcall(function() Lighting.Ambient=Color3.fromRGB(178,178,178) Lighting.Brightness=1 end) end})
-TabVisual:AddToggle({Name="X-Ray",Default=false,Callback=function(v) if v then for _,obj in pairs(Workspace:GetDescendants()) do if obj:IsA("BasePart") and obj.Name~="Terrain" and not obj:IsDescendantOf(player.Character) then obj.LocalTransparencyModifier = 0.6 end end else for _,obj in pairs(Workspace:GetDescendants()) do if obj:IsA("BasePart") and obj.Name~="Terrain" then obj.LocalTransparencyModifier = 0 end end end end})
-TabVisual:AddToggle({Name="Night Vision",Default=false,Callback=function(v) if v then local nv=Instance.new("ColorCorrectionEffect",Lighting) nv.Name="NV_VANYLA" nv.Brightness,nv.Contrast,nv.Saturation=0.3,0.2,0.8 nv.TintColor=Color3.fromRGB(200,255,200) else if Lighting:FindFirstChild("NV_VANYLA") then Lighting.NV_VANYLA:Destroy() end end end})
-
-TabOpti:AddButton({Name="Optimize Mode",Callback=function()
-	if isOptimized then return end
-	isOptimized=true
-	for _,obj in pairs(Workspace:GetDescendants()) do
-		if obj:IsA("BasePart") then
-			table.insert(optimizedParts,obj)
-			obj.Material=Enum.Material.SmoothPlastic
-			obj.Reflectance=0
-			if obj:FindFirstChildOfClass("SurfaceAppearance") then obj:FindFirstChildOfClass("SurfaceAppearance"):Destroy() end
-		elseif obj:IsA("ParticleEmitter") or obj:IsA("Fire") or obj:IsA("Smoke") or obj:IsA("Sparkles") then
-			obj.Enabled=false
-		elseif obj:IsA("Highlight") then
-			obj.Enabled=false
-		end
-	end
-	Lighting.GlobalShadows=false
-	Lighting.FogEnd=1e6
-end})
-TabOpti:AddButton({Name="Ultra Optimize",Callback=function()
-	if isUltraMode then return end
-	isUltraMode=true
-	if not isOptimized then TabOpti.Buttons and TabOpti.Buttons["Optimize Mode"] and TabOpti.Buttons["Optimize Mode"].Callback() end
-	Lighting.Technology=Enum.Technology.Legacy
-	Lighting.FogEnd,Lighting.FogStart=1e6,1e6
-	Lighting.Brightness=5
-	Lighting.Ambient=Color3.fromRGB(178,178,178)
-	for _,obj in pairs(Workspace:GetDescendants()) do
-		if obj:IsA("ParticleEmitter") or obj:IsA("Fire") or obj:IsA("Smoke") or obj:IsA("Sparkles") then obj.Enabled=false
-		elseif obj:IsA("SurfaceAppearance") then obj:Destroy()
-		elseif obj:IsA("Highlight") then obj.Enabled=false
-		elseif obj:IsA("Sound") and obj.IsPlaying then obj.Volume=obj.Volume*0.5
-		elseif obj:IsA("BasePart") then obj.Material=Enum.Material.SmoothPlastic obj.Reflectance=0 end
-	end
-end})
-TabOpti:AddToggle({Name="Hide NameTags",Default=false,Callback=function(v) tagHidden=v for _,plr in pairs(Players:GetPlayers()) do if plr.Character and plr.Character:FindFirstChild("Head") then local nh=plr.Character.Head:FindFirstChild("Nametag") or plr.Character.Head:FindFirstChild("NameTag") if nh and nh:IsA("BillboardGui") then nh.Enabled=not tagHidden end end end end})
-TabOpti:AddToggle({Name="Hide Players",Default=false,Callback=function(v) hiddenPlayers=v for _,plr in pairs(Players:GetPlayers()) do if plr~=player and plr.Character then for _,part in pairs(plr.Character:GetDescendants()) do if part:IsA("BasePart") or part:IsA("Decal") then part.Transparency = hiddenPlayers and 1 or 0 end end end end end})
-
-TabUtil:AddToggle({Name="Anti-AFK",Default=false,Callback=function(v) antiAfkEnabled=v end})
-TabUtil:AddButton({Name="Rejoin",Callback=function() TeleportService:Teleport(game.PlaceId,player) end})
-TabUtil:AddButton({Name="Reset Character",Callback=function() if character and character:FindFirstChild("HumanoidRootPart") then character:BreakJoints() end end})
-do
-	local playersList = {}
-	for _,p in pairs(Players:GetPlayers()) do table.insert(playersList,p.Name) end
-	local dropdown = TabUtil:AddDropdown({Name="Teleport To Player",Default=playersList[1] or "",Options=playersList,Callback=function(v) local target = Players:FindFirstChild(v) if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") and character and character:FindFirstChild("HumanoidRootPart") then character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame end end})
-	Players.PlayerAdded:Connect(function(p) dropdown:Refresh((function() local t={} for _,pl in pairs(Players:GetPlayers()) do table.insert(t,pl.Name) end return t end)(),true) end)
-	Players.PlayerRemoving:Connect(function() dropdown:Refresh((function() local t={} for _,pl in pairs(Players:GetPlayers()) do table.insert(t,pl.Name) end return t end)(),true) end)
+-- Utility functions
+local function getCharacter()
+    if not LocalPlayer then return nil end
+    return LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 end
 
-TabTP:AddTextbox({Name="Coords (x,y,z)",Default="",TextDisappear=false,Callback=function(v)local coords={} for c in string.gmatch(v,"[^,]+") do table.insert(coords,tonumber(c)) end if #coords==3 and character:FindFirstChild("HumanoidRootPart") then character.HumanoidRootPart.CFrame=CFrame.new(coords[1],coords[2]+5,coords[3]) end end})
-
-do
-	local playersNames = {}
-	for _,p in pairs(Players:GetPlayers()) do table.insert(playersNames,p.Name) end
-	local dropdown = TabFun:AddDropdown({Name="Morph Player",Default=playersNames[1] or "",Options=playersNames,Callback=function(v) local target = Players:FindFirstChild(v) if target then local ok,desc = pcall(function() return Players:GetHumanoidDescriptionFromUserIdAsync(target.UserId) end) if ok and desc and humanoid and humanoid.Parent then humanoid:ApplyDescription(desc) end end end})
-	Players.PlayerAdded:Connect(function(p) dropdown:Refresh((function() local t={} for _,pl in pairs(Players:GetPlayers()) do table.insert(t,pl.Name) end return t end)(),true) end)
-	Players.PlayerRemoving:Connect(function() dropdown:Refresh((function() local t={} for _,pl in pairs(Players:GetPlayers()) do table.insert(t,pl.Name) end return t end)(),true) end)
-	TabFun:AddButton({Name="Reset Morph",Callback=function() if humanoid and humanoid.Parent then local desc = humanoid:GetAppliedDescription and humanoid:GetAppliedDescription() if desc then humanoid:ApplyDescription(desc) end end end})
-	TabFun:AddButton({Name="Dance (Play Animation)",Callback=function()
-		if humanoid and humanoid.Parent then
-			local anim = Instance.new("Animation")
-			anim.AnimationId = "rbxassetid://243990076" 
-			local track = humanoid:LoadAnimation(anim)
-			track:Play()
-		end
-	end})
-	TabFun:AddToggle({Name="Spin",Default=false,Callback=function(v) if v then local hrp=character:FindFirstChild("HumanoidRootPart") if hrp then coroutine.wrap(function() while v and hrp and hrp.Parent do hrp.CFrame = hrp.CFrame * CFrame.Angles(0,math.rad(10),0) wait(0.05) end end)() end else end end})
+local function getHumanoid()
+    local char = getCharacter()
+    if not char then return nil end
+    return char:FindFirstChildOfClass("Humanoid")
 end
 
-RunService.RenderStepped:Connect(function()
-	if unlimitedJump and humanoid and humanoid.Parent then humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end
-	if noclipEnabled and character then for _,p in pairs(character:GetDescendants()) do if p:IsA("BasePart") then p.CanCollide=false end end end
-	if espEnabled then
-		for _,plr in pairs(Players:GetPlayers()) do
-			if plr~=player and plr.Character and plr.Character:FindFirstChild("Head") then
-				if not espObjects[plr] then
-					local bg = Instance.new("BillboardGui")
-					bg.Name = "VanylaESP"
-					bg.Size = UDim2.new(0,100,0,40)
-					bg.Adornee = plr.Character:FindFirstChild("Head")
-					bg.AlwaysOnTop = true
-					bg.Parent = workspace.CurrentCamera
-					local label = Instance.new("TextLabel",bg)
-					label.Size = UDim2.new(1,0,1,0)
-					label.BackgroundTransparency = 1
-					label.Text = plr.Name
-					label.TextStrokeTransparency = 0
-					label.TextColor3 = Color3.fromRGB(255,255,255)
-					label.Font = Enum.Font.GothamBold
-					label.TextScaled = true
-					espObjects[plr] = bg
-				else
-					local bg = espObjects[plr]
-					if not bg.Parent then espObjects[plr]=nil end
-				end
-			end
-		end
-		for pl,gui in pairs(espObjects) do if (not pl or not pl.Parent) or (not pl.Character) then if gui and gui.Parent then gui:Destroy() end espObjects[pl]=nil end end
-	else
-		for _,g in pairs(espObjects) do if g and g.Parent then g:Destroy() end end
-		espObjects = {}
-	end
-	if flyEnabled and character and character:FindFirstChild("HumanoidRootPart") then
-		local hrp = character.HumanoidRootPart
-		if not flyBody then
-			local bv = Instance.new("BodyVelocity")
-			bv.MaxForce = Vector3.new(9e9,9e9,9e9)
-			bv.P = 1250
-			bv.Parent = hrp
-			flyBody = bv
-		end
-		local moveVec = Vector3.new()
-		if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveVec = moveVec + (workspace.CurrentCamera.CFrame.LookVector) end
-		if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveVec = moveVec - (workspace.CurrentCamera.CFrame.LookVector) end
-		if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveVec = moveVec - (workspace.CurrentCamera.CFrame.RightVector) end
-		if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveVec = moveVec + (workspace.CurrentCamera.CFrame.RightVector) end
-		if UserInputService:IsKeyDown(Enum.KeyCode.Space) then moveVec = moveVec + Vector3.new(0,1,0) end
-		if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then moveVec = moveVec - Vector3.new(0,1,0) end
-		if flyBody then
-			if moveVec.Magnitude > 0 then
-				flyBody.Velocity = moveVec.Unit * flySpeed
-			else
-				flyBody.Velocity = Vector3.new(0,0,0)
-			end
-		end
-	end
-	if godEnabled and humanoid then humanoid.MaxHealth = 9e9 if humanoid.Health < humanoid.MaxHealth then humanoid.Health = humanoid.MaxHealth end end
-	if antiAfkEnabled then
-		local Virtual = UserInputService
-		pcall(function() Virtual:CaptureController() end)
-	end
+local function safeNotify(title, content, time)
+    pcall(function()
+        OrionLib:MakeNotification({Name = title or "VANYLA", Content = content or "", Image = "rbxassetid://4483345998", Time = time or 5})
+    end)
+end
+
+-- ===== MAIN UTILITIES =====
+
+-- Destroy UI Button
+miscSection:AddButton({
+    Name = "Destroy UI",
+    Callback = function()
+        pcall(function() OrionLib:Destroy() end)
+    end
+})
+
+-- Rejoin Server
+miscSection:AddButton({
+    Name = "Rejoin Server",
+    Callback = function()
+        pcall(function()
+            safeNotify("Rejoining", "Attempting to rejoin this server...", 3)
+            local placeId = game.PlaceId
+            local jobId = game.JobId
+            TeleportService:TeleportToPlaceInstance(placeId, jobId, LocalPlayer)
+        end)
+    end
+})
+
+-- Copy flags example (show usage)
+mainTab:AddButton({
+    Name = "Print Example Flag Values",
+    Callback = function()
+        pcall(function()
+            local flags = OrionLib.Flags
+            -- print a few saved flags (if exist)
+            print("WalkSpeed:", flags["walkspeed"] and flags["walkspeed"].Value or "n/a")
+            print("JumpPower:", flags["jumppower"] and flags["jumppower"].Value or "n/a")
+            print("Noclip:", flags["noclip"] and flags["noclip"].Value or "n/a")
+            safeNotify("Flags", "Printed example flags to output.", 3)
+        end)
+    end
+})
+
+-- ===== PLAYER MOVEMENT =====
+
+-- WalkSpeed slider (flagged & saved)
+local speedSlider = movementSection:AddSlider({
+    Name = "WalkSpeed",
+    Min = 8,
+    Max = 500,
+    Default = 16,
+    Color = Color3.fromRGB(255,255,255),
+    Increment = 1,
+    ValueName = "studs/s",
+    Callback = function(val)
+        pcall(function()
+            local humanoid = getHumanoid()
+            if humanoid then
+                humanoid.WalkSpeed = val
+            end
+        end)
+    end,
+    -- flags for config
+})
+-- Set flag & save using documentation pattern
+-- (Orion: AddSlider doesn't accept Flag/Save in doc, but flags work for slider per doc)
+-- We will add a flag entry manually if needed:
+if OrionLib.Flags then
+    OrionLib.Flags["walkspeed"] = OrionLib.Flags["walkspeed"] or {Value = speedSlider.Value}
+end
+
+-- JumpPower slider
+local jumpSlider = movementSection:AddSlider({
+    Name = "JumpPower",
+    Min = 0,
+    Max = 300,
+    Default = 50,
+    Color = Color3.fromRGB(255,255,255),
+    Increment = 1,
+    ValueName = "power",
+    Callback = function(val)
+        pcall(function()
+            local humanoid = getHumanoid()
+            if humanoid then
+                -- Humanoid.UseJumpPower is preferable in modern Roblox
+                if humanoid.UseJumpPower ~= nil then
+                    humanoid.UseJumpPower = true
+                    humanoid.JumpPower = val
+                else
+                    humanoid.JumpHeight = val -- fallback (not ideal)
+                end
+            end
+        end)
+    end
+})
+
+-- Noclip toggle (works by turning off CanCollide on character parts while active)
+local noclipToggle = movementSection:AddToggle({
+    Name = "Noclip",
+    Default = false,
+    Callback = function(state)
+        pcall(function()
+            if state then
+                -- Connect a step to disable collisions each frame
+                noclipToggle._conn = RunService.Stepped:Connect(function()
+                    local char = getCharacter()
+                    if char then
+                        for _, part in pairs(char:GetChildren()) do
+                            if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+                                part.CanCollide = false
+                            end
+                        end
+                    end
+                end)
+            else
+                if noclipToggle._conn then
+                    noclipToggle._conn:Disconnect()
+                    noclipToggle._conn = nil
+                end
+                -- try to re-enable collisions
+                local char = getCharacter()
+                if char then
+                    for _, part in pairs(char:GetChildren()) do
+                        if part:IsA("BasePart") then
+                            pcall(function() part.CanCollide = true end)
+                        end
+                    end
+                end
+            end
+        end)
+    end
+})
+
+-- Simple Fly implementation (local)
+local flyToggle = movementSection:AddToggle({
+    Name = "Fly (Hold movement keys)",
+    Default = false,
+    Callback = function(state)
+        pcall(function()
+            local char = getCharacter()
+            if not char then return end
+            local hrp = char:FindFirstChild("HumanoidRootPart")
+            local humanoid = getHumanoid()
+            if not hrp or not humanoid then return end
+
+            if state then
+                humanoid.PlatformStand = true
+                local bv = Instance.new("BodyVelocity")
+                bv.Name = "VanylaFlyBV"
+                bv.MaxForce = Vector3.new(1e5,1e5,1e5)
+                bv.Velocity = Vector3.new(0,0,0)
+                bv.Parent = hrp
+
+                local bg = Instance.new("BodyGyro")
+                bg.Name = "VanylaFlyBG"
+                bg.MaxTorque = Vector3.new(1e5,1e5,1e5)
+                bg.CFrame = hrp.CFrame
+                bg.Parent = hrp
+
+                local speed = 100
+                flyToggle._conn = RunService.RenderStepped:Connect(function()
+                    if not hrp or not char then return end
+                    -- read input direction from Humanoid.MoveDirection
+                    local moveDir = humanoid.MoveDirection
+                    local targetVel = moveDir * speed
+                    -- keep a small upward velocity if jumping / cast
+                    if humanoid.Jump then
+                        targetVel = targetVel + Vector3.new(0, speed/2, 0)
+                    end
+                    bv.Velocity = targetVel
+                    bg.CFrame = hrp.CFrame
+                end)
+            else
+                if flyToggle._conn then
+                    flyToggle._conn:Disconnect()
+                    flyToggle._conn = nil
+                end
+                local hrp = getCharacter() and getCharacter():FindFirstChild("HumanoidRootPart")
+                if hrp then
+                    for _, v in pairs(hrp:GetChildren()) do
+                        if v.Name == "VanylaFlyBV" or v.Name == "VanylaFlyBG" then
+                            v:Destroy()
+                        end
+                    end
+                end
+                if humanoid then
+                    humanoid.PlatformStand = false
+                end
+            end
+        end)
+    end
+})
+
+-- Bind to toggle fly quickly (example: F)
+movementSection:AddBind({
+    Name = "Fly Bind",
+    Default = Enum.KeyCode.F,
+    Hold = false,
+    Callback = function()
+        pcall(function()
+            local cur = flyToggle and flyToggle.Value
+            if flyToggle and flyToggle.Set then
+                flyToggle:Set(not cur)
+            end
+        end)
+    end
+})
+
+-- ===== TELEPORTS =====
+
+-- Teleport to respawn/spawn location (works if SpawnLocation exists)
+teleportSection:AddButton({
+    Name = "Teleport to Spawn",
+    Callback = function()
+        pcall(function()
+            local spawnPos
+            -- try to find SpawnLocation(s)
+            for _, v in pairs(workspace:GetDescendants()) do
+                if v:IsA("SpawnLocation") then
+                    spawnPos = v.Position
+                    break
+                end
+            end
+            -- fallback: try to use SpawnLocation property or map-specific named objects
+            if not spawnPos then
+                if workspace:FindFirstChild("SpawnLocation") and workspace.SpawnLocation:IsA("BasePart") then
+                    spawnPos = workspace.SpawnLocation.Position
+                end
+            end
+            -- fallback to default respawn point: nil -> notify
+            if spawnPos and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(spawnPos + Vector3.new(0,5,0))
+                safeNotify("Teleported", "Moved to spawn location.", 3)
+            else
+                safeNotify("Teleport failed", "No spawn location found or no character.", 4)
+            end
+        end)
+    end
+})
+
+-- Teleport to mouse target (if available)
+teleportSection:AddButton({
+    Name = "Teleport to Mouse (safe)",
+    Callback = function()
+        pcall(function()
+            local mouse = LocalPlayer:GetMouse()
+            local pos = mouse and mouse.Hit and mouse.Hit.p
+            if pos and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(pos + Vector3.new(0,5,0))
+                safeNotify("Teleported", "Teleported to mouse position.", 3)
+            else
+                safeNotify("Teleport failed", "Mouse position not available.", 3)
+            end
+        end)
+    end
+})
+
+-- Dropdown of common places (example placeholder that often won't work cross-game but included)
+local placeListDropdown = teleportSection:AddDropdown({
+    Name = "Common Places (example)",
+    Default = "Select",
+    Options = {"Spawn", "Center", "Random Nearby"},
+    Callback = function(val)
+        pcall(function()
+            if val == "Spawn" then
+                -- reuse teleport to spawn
+                for _, btn in pairs(teleportSection:GetChildren() or {}) do end
+                -- call above button via direct logic (simpler: just notify)
+                safeNotify("Teleport", "Press Teleport to Spawn button to go.", 3)
+            elseif val == "Random Nearby" then
+                local char = getCharacter()
+                if char and char:FindFirstChild("HumanoidRootPart") then
+                    local hrp = char.HumanoidRootPart
+                    hrp.CFrame = hrp.CFrame * CFrame.new(math.random(-50,50), 0, math.random(-50,50))
+                    safeNotify("Teleported", "Random nearby teleport.", 3)
+                end
+            else
+                safeNotify("Info", "Selected: "..tostring(val), 3)
+            end
+        end)
+    end
+})
+
+-- ===== UI / CONFIG =====
+
+-- UI Theme colorpicker (stored in flags)
+local themeColor = uiSection:AddColorpicker({
+    Name = "Theme Color",
+    Default = Color3.fromRGB(85,170,255),
+    Callback = function(color)
+        pcall(function()
+            -- Orion's internal theme mutate may not be exposed; this is a placeholder saving color for your scripts
+            -- You can read OrionLib.Flags["theme_color"].Value elsewhere to apply theme if supported.
+            if OrionLib and OrionLib.Flags then
+                OrionLib.Flags["theme_color"] = OrionLib.Flags["theme_color"] or {Value = color}
+                OrionLib.Flags["theme_color"].Value = color
+            end
+            safeNotify("Theme", "Theme color set (saved).", 2)
+        end)
+    end
+})
+
+-- Toggle save config example
+uiSection:AddToggle({
+    Name = "Auto Save Config",
+    Default = true,
+    Callback = function(v)
+        pcall(function()
+            -- This toggle is just illustrative; Orion window already takes SaveConfig param
+            safeNotify("Config", "Auto Save Config: "..tostring(v), 2)
+        end)
+    end
+})
+
+-- Keybind to hide/show UI (best-effort: will hide Orion's intro frame if accessible)
+uiSection:AddBind({
+    Name = "Toggle UI (attempt)",
+    Default = Enum.KeyCode.RightControl,
+    Hold = false,
+    Callback = function()
+        pcall(function()
+            -- Try to find Orion main GUI in CoreGui or Players.LocalPlayer: Wait for likely parents
+            local found = false
+            for _, gui in pairs(game:GetService("CoreGui"):GetChildren()) do
+                if gui.Name:lower():find("orion") or gui.Name:lower():find("vanyl") or gui.Name:lower():find("vanyla") then
+                    gui.Enabled = not gui.Enabled
+                    found = true
+                end
+            end
+            -- fallback: try RobloxGui (may be inaccessible)
+            if not found then
+                -- best-effort notification
+                safeNotify("UI Toggle", "Tried toggle, might not be supported in this environment.", 3)
+            end
+        end)
+    end
+})
+
+-- Save current config button
+uiSection:AddButton({
+    Name = "Force Save Config (if supported)",
+    Callback = function()
+        pcall(function()
+            if OrionLib.SaveConfig then
+                if OrionLib.SaveConfig == true and OrionLib.ConfigFolder then
+                    safeNotify("Config", "Config saving handled automatically by Orion.", 3)
+                else
+                    safeNotify("Config", "Orion config not enabled or not accessible.", 3)
+                end
+            else
+                safeNotify("Config", "OrionLib:SaveConfig not exposed.", 3)
+            end
+        end)
+    end
+})
+
+-- ===== MISC FEATURES =====
+
+-- Simple spammy test button (example utility)
+utilitiesSection:AddButton({
+    Name = "Test Notification",
+    Callback = function()
+        safeNotify("VANYLA", "This is a test notification from VANYLA HUB.", 4)
+    end
+})
+
+-- Textbox to run small commands (non-destructive)
+miscSection:AddTextbox({
+    Name = "Run Command (print only)",
+    Default = "print('hello world')",
+    TextDisappear = true,
+    Callback = function(value)
+        pcall(function()
+            -- For safety, only allow print commands: naive check
+            if tostring(value):lower():match("^print") then
+                local ok, err = pcall(function() loadstring(value)() end)
+                if not ok then
+                    safeNotify("Command Error", tostring(err), 4)
+                end
+            else
+                safeNotify("Command blocked", "Only print(...) allowed for safety.", 4)
+            end
+        end)
+    end
+})
+
+-- ===== CLEANUP ON CHARACTER ADDED =====
+-- reapply walk/jump settings on respawn if sliders are set
+LocalPlayer.CharacterAdded:Connect(function(char)
+    wait(1)
+    pcall(function()
+        local hs = OrionLib and OrionLib.Flags and OrionLib.Flags["walkspeed"] and OrionLib.Flags["walkspeed"].Value or speedSlider.Value
+        local jp = OrionLib and OrionLib.Flags and OrionLib.Flags["jumppower"] and OrionLib.Flags["jumppower"].Value or jumpSlider.Value
+        local humanoid = char:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.WalkSpeed = hs or 16
+            if humanoid.UseJumpPower ~= nil then
+                humanoid.UseJumpPower = true
+                humanoid.JumpPower = jp or 50
+            end
+        end
+    end)
 end)
 
-UserInputService.JumpRequest:Connect(function()
-	if unlimitedJump and humanoid and humanoid.Parent then humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end
-end)
+-- Initial small notif
+safeNotify("💫 VANYLA HUB", "Loaded — open the UI to begin.", 4)
 
-Players.PlayerRemoving:Connect(function(pl)
-	if espObjects[pl] then if espObjects[pl].Parent then espObjects[pl]:Destroy() end espObjects[pl]=nil end
-end)
-
+-- REQUIRED: initialize Orion
 OrionLib:Init()
