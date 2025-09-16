@@ -12,6 +12,7 @@ local LocalPlayer = Players.LocalPlayer
 local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 
+-- PLAYER TAB
 local PlayerTab = Window:MakeTab({Name = "Player", Icon = "rbxassetid://4483345998", PremiumOnly = false})
 
 local WalkSpeedBox = PlayerTab:AddTextbox({
@@ -52,7 +53,7 @@ UIS.JumpRequest:Connect(function()
 	end
 end)
 
-PlayerTab:AddDropdown({
+local MorphDropdown = PlayerTab:AddDropdown({
 	Name = "Morph Player",
 	Default = "",
 	Options = function()
@@ -82,6 +83,7 @@ PlayerTab:AddDropdown({
 	end
 })
 
+-- OPTIFINE TAB
 local OptifineTab = Window:MakeTab({Name = "Optifine", Icon = "rbxassetid://4483345998", PremiumOnly = false})
 OptifineTab:AddButton({
 	Name = "Anti Lag",
@@ -90,24 +92,37 @@ OptifineTab:AddButton({
 	end
 })
 
+-- TELEPORT TAB
 local TeleportTab = Window:MakeTab({Name = "Teleport", Icon = "rbxassetid://4483345998", PremiumOnly = false})
-
 local SavedCoords = {}
 
-TeleportTab:AddDropdown({
+local PlayerList = {}
+for _,v in pairs(Players:GetPlayers()) do
+	if v ~= LocalPlayer then
+		table.insert(PlayerList, v.Name)
+	end
+end
+
+local TeleportToPlayerDropdown = TeleportTab:AddDropdown({
 	Name = "Teleport ke Pemain",
 	Default = "",
-	Options = function()
-		local list = {}
-		for _,v in pairs(Players:GetPlayers()) do
-			if v ~= LocalPlayer then table.insert(list, v.Name) end
-		end
-		return list
-	end,
+	Options = PlayerList,
 	Callback = function(Value)
 		local target = Players:FindFirstChild(Value)
-		if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+		if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
 			LocalPlayer.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame
+		end
+	end
+})
+
+local TeleportToCoordDropdown = TeleportTab:AddDropdown({
+	Name = "Teleport ke Koordinat",
+	Default = "",
+	Options = {},
+	Callback = function(Value)
+		local index = tonumber(string.match(Value, "%d+"))
+		if SavedCoords[index] and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+			LocalPlayer.Character.HumanoidRootPart.CFrame = SavedCoords[index]
 		end
 	end
 })
@@ -117,30 +132,17 @@ TeleportTab:AddButton({
 	Callback = function()
 		if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
 			table.insert(SavedCoords, LocalPlayer.Character.HumanoidRootPart.CFrame)
+			local CoordList = {}
+			for i=1,#SavedCoords do
+				table.insert(CoordList, "Koordinat "..i)
+			end
+			TeleportToCoordDropdown:Refresh(CoordList,true)
 			OrionLib:MakeNotification({
 				Name = "Saved!",
 				Content = "Koordinat tersimpan: "..#SavedCoords,
 				Image = "rbxassetid://4483345998",
 				Time = 3
 			})
-		end
-	end
-})
-
-TeleportTab:AddDropdown({
-	Name = "Teleport ke Koordinat",
-	Default = "",
-	Options = function()
-		local list = {}
-		for i=1,#SavedCoords do
-			table.insert(list, "Koordinat "..i)
-		end
-		return list
-	end,
-	Callback = function(Value)
-		local index = tonumber(string.match(Value, "%d+"))
-		if SavedCoords[index] and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-			LocalPlayer.Character.HumanoidRootPart.CFrame = SavedCoords[index]
 		end
 	end
 })
