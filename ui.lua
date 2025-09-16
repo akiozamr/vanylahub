@@ -1,7 +1,5 @@
--- load Orion
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/jensonhirst/Orion/main/source')))()
 
--- buat window utama
 local Window = OrionLib:MakeWindow({
     Name = "💫 VANYLA HUB",
     HidePremium = false,
@@ -12,7 +10,24 @@ local Window = OrionLib:MakeWindow({
 
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
-local humanoid = player.Character and player.Character:WaitForChild("Humanoid")
+
+local humanoid
+local function getHumanoid()
+    if player.Character then
+        humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.UseJumpPower = true
+        end
+    end
+end
+
+-- ambil humanoid awal
+getHumanoid()
+-- update humanoid kalau respawn
+player.CharacterAdded:Connect(function()
+    player.Character:WaitForChild("Humanoid")
+    getHumanoid()
+end)
 
 -- variabel teleport
 local savedPosition = nil
@@ -30,7 +45,6 @@ PlayerTab:AddSlider({
     Min = 0,
     Max = 200,
     Default = humanoid and humanoid.WalkSpeed or 16,
-    Color = Color3.fromRGB(255,255,255),
     Increment = 1,
     ValueName = "speed",
     Callback = function(Value)
@@ -46,11 +60,11 @@ PlayerTab:AddSlider({
     Min = 0,
     Max = 200,
     Default = humanoid and humanoid.JumpPower or 50,
-    Color = Color3.fromRGB(255,255,255),
     Increment = 1,
     ValueName = "power",
     Callback = function(Value)
         if humanoid then
+            humanoid.UseJumpPower = true
             humanoid.JumpPower = Value
         end
     end    
@@ -72,7 +86,7 @@ PlayerTab:AddToggle({
     end    
 })
 
--- TAB OPTIFINE (kosong dulu)
+-- TAB OPTIFINE
 local OptifineTab = Window:MakeTab({
     Name = "Optifine",
     Icon = "rbxassetid://4483345998",
@@ -137,5 +151,4 @@ TeleportTab:AddButton({
     end    
 })
 
--- init Orion
 OrionLib:Init()
