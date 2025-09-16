@@ -1,8 +1,9 @@
-local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/jensonhirst/Orion/main/source')))()
+local OrionLib = loadstring(game:HttpGet('https://raw.githubusercontent.com/jensonhirst/Orion/main/source'))()
 local LocalPlayer = game:GetService("Players").LocalPlayer
 local Workspace = game:GetService("Workspace")
 local Lighting = game:GetService("Lighting")
 local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
 
 local Window = OrionLib:MakeWindow({Name = "💫 VANYLA HUB", HidePremium = false, SaveConfig = true, ConfigFolder = "VanylaHub"})
 
@@ -25,19 +26,27 @@ end
 PlayerTab:AddTextbox({Name = "WalkSpeed", Default = "16", TextDisappear = false, Callback = function(Value) setHumanoidProperty("WalkSpeed", Value) end})
 PlayerTab:AddTextbox({Name = "JumpPower", Default = "50", TextDisappear = false, Callback = function(Value) setHumanoidProperty("JumpPower", Value) end})
 
-local teleportFromBox = TeleportTab:AddTextbox({Name = "From Username", Default = "", TextDisappear = true, Callback = function() end})
-local teleportToBox = TeleportTab:AddTextbox({Name = "To Username", Default = "", TextDisappear = true, Callback = function() end})
+local function getOtherPlayers()
+    local list = {}
+    for _,p in pairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer then
+            table.insert(list, p.Name)
+        end
+    end
+    return list
+end
+
+local fromDropdown = TeleportTab:AddDropdown({Name = "Teleport From", Default = "", Options = getOtherPlayers(), Callback = function() end})
+local toDropdown = TeleportTab:AddDropdown({Name = "Teleport To", Default = "", Options = getOtherPlayers(), Callback = function() end})
 
 TeleportTab:AddButton({Name = "Teleport", Callback = function()
-    local from = teleportFromBox.Text
-    local to = teleportToBox.Text
-    local fromPlayer = game:GetService("Players"):FindFirstChild(from)
-    local toPlayer = game:GetService("Players"):FindFirstChild(to)
+    local fromPlayer = Players:FindFirstChild(fromDropdown.Value)
+    local toPlayer = Players:FindFirstChild(toDropdown.Value)
     if fromPlayer and toPlayer and fromPlayer.Character and toPlayer.Character then
-        local root = fromPlayer.Character:FindFirstChild("HumanoidRootPart")
-        local targetRoot = toPlayer.Character:FindFirstChild("HumanoidRootPart")
-        if root and targetRoot then
-            root.CFrame = targetRoot.CFrame
+        local fromRoot = fromPlayer.Character:FindFirstChild("HumanoidRootPart")
+        local toRoot = toPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if fromRoot and toRoot then
+            fromRoot.CFrame = toRoot.CFrame
         end
     end
 end})
@@ -62,10 +71,8 @@ TeleportTab:AddButton({Name = "Refresh Coordinates", Callback = function()
     coordDropdown:Refresh(options, true)
 end})
 
-local antiLagEnabled = false
-
 AntiLagTab:AddToggle({Name = "Anti-Lag", Default = false, Callback = function(Value)
-    antiLagEnabled = Value
+    local antiLagEnabled = Value
     if antiLagEnabled then
         spawn(function()
             while antiLagEnabled do
